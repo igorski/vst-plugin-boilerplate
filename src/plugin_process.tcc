@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Igor Zinken - http://www.igorski.nl
+ * Copyright (c) 2020 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -63,7 +63,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
         for ( i = 0; i < bufferSize; ++i ) {
 
             // before writing to the out buffer we take a snapshot of the current in sample
-            // value as VST2 in Ableton Live supplies the same buffer for in and out!
+            // value as VST2 in Ableton Live supplies the same buffer for inBuffer and outBuffer!
             inSample = channelInBuffer[ i ];
 
             // wet mix (e.g. the effected signal)

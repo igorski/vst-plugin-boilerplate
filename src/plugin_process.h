@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Igor Zinken - http://www.igorski.nl
+ * Copyright (c) 2020 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -33,12 +33,6 @@ using namespace Steinberg;
 namespace Igorski {
 class PluginProcess {
 
-    // max delay time in milliseconds
-    // this is used when host sync is disabled
-    // otherwise max delay time equals a full measure
-
-    const float MAX_DELAY_TIME_MS = 5000.f;
-
     public:
         PluginProcess( int amountOfChannels );
         ~PluginProcess();
@@ -54,8 +48,8 @@ class PluginProcess {
         Limiter* limiter;
 
     private:
-        AudioBuffer* _preMixBuffer;  // buffer used for the pre-delay effect mixing
-        AudioBuffer* _postMixBuffer; // buffer used for the post-delay effect mixing
+        AudioBuffer* _preMixBuffer;  // buffer used for the pre effect mixing
+        AudioBuffer* _postMixBuffer; // buffer used for the post effect mixing
 
         float _dryMix;
         float _wetMix;
