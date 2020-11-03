@@ -159,14 +159,14 @@ function generateVstImpl() {
     MODEL.forEach( entry => {
         const { model, paramId, saved, toSave } = generateNamesForParam( entry );
 
-        // 1. Homecorrupter::process
+        // 1. __PLUGIN_NAME__::process
         processLines.push(`
                     case ${paramId}:
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
                             ${model} = ( float ) value;
                         break;`);
 
-        // 2. Homecorrupter::setState
+        // 2. __PLUGIN_NAME__::setState
 
         setStateLines.push(`
     float ${saved} = 0.f;
@@ -176,7 +176,7 @@ function generateVstImpl() {
         setStateSwapLines.push(`   SWAP_32( ${saved} )`);   // byte swap
         setStateApplyLines.push(`    ${model} = ${saved};`); // assignment to model
 
-        // 3. Homecorrupter::getState
+        // 3. __PLUGIN_NAME__::getState
 
         getStateLines.push(`    float ${toSave} = ${model};`);
         getStateSwapLines.push(`   SWAP_32( ${toSave} )`);   // byte swap
