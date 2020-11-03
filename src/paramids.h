@@ -30,8 +30,11 @@ enum
     // and consumed by controller.cpp to update the model
 
 // --- AUTO-GENERATED START
-    kBitCrushAmountId = 0,    // The amount of bit crushing applied
-    kBitCrushLFOId = 1,    // Enable / disable the BitCrusher LFO
+    kBitDepthId = 0,    // Resolution
+    kBitCrushLfoId = 1,    // Bit crush LFO
+    kBitCrushLfoDepthId = 2,    // Bit crush LFO depth
+    kWetMixId = 3,    // Wet mix
+    kDryMixId = 4,    // Dry mix
 
 // --- AUTO-GENERATED END
 

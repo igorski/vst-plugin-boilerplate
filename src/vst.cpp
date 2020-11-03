@@ -126,14 +126,29 @@ tresult PLUGIN_API __PLUGIN_NAME__::process( ProcessData& data )
                 {
 // --- AUTO-GENERATED PROCESS START
 
-                    case kBitCrushAmountId:
+                    case kBitDepthId:
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
-                            fBitCrushAmount = ( float ) value;
+                            fBitDepth = ( float ) value;
                         break;
 
-                    case kBitCrushLFOId:
+                    case kBitCrushLfoId:
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
-                            fBitCrushLFO = ( float ) value;
+                            fBitCrushLfo = ( float ) value;
+                        break;
+
+                    case kBitCrushLfoDepthId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fBitCrushLfoDepth = ( float ) value;
+                        break;
+
+                    case kWetMixId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fWetMix = ( float ) value;
+                        break;
+
+                    case kDryMixId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            fDryMix = ( float ) value;
                         break;
 
 // --- AUTO-GENERATED PROCESS END
@@ -232,12 +247,24 @@ tresult PLUGIN_API __PLUGIN_NAME__::setState( IBStream* state )
 
 // --- AUTO-GENERATED SETSTATE START
 
-    float savedBitCrushAmount = 0.f;
-    if ( state->read( &savedBitCrushAmount, sizeof ( float )) != kResultOk )
+    float savedBitDepth = 0.f;
+    if ( state->read( &savedBitDepth, sizeof ( float )) != kResultOk )
         return kResultFalse;
 
-    float savedBitCrushLFO = 0.f;
-    if ( state->read( &savedBitCrushLFO, sizeof ( float )) != kResultOk )
+    float savedBitCrushLfo = 0.f;
+    if ( state->read( &savedBitCrushLfo, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
+    float savedBitCrushLfoDepth = 0.f;
+    if ( state->read( &savedBitCrushLfoDepth, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
+    float savedWetMix = 0.f;
+    if ( state->read( &savedWetMix, sizeof ( float )) != kResultOk )
+        return kResultFalse;
+
+    float savedDryMix = 0.f;
+    if ( state->read( &savedDryMix, sizeof ( float )) != kResultOk )
         return kResultFalse;
 
 // --- AUTO-GENERATED SETSTATE END
@@ -245,16 +272,22 @@ tresult PLUGIN_API __PLUGIN_NAME__::setState( IBStream* state )
 #if BYTEORDER == kBigEndian
 
 // --- AUTO-GENERATED SETSTATE SWAP START
-   SWAP_32( savedBitCrushAmount )
-   SWAP_32( savedBitCrushLFO )
+   SWAP_32( savedBitDepth )
+   SWAP_32( savedBitCrushLfo )
+   SWAP_32( savedBitCrushLfoDepth )
+   SWAP_32( savedWetMix )
+   SWAP_32( savedDryMix )
 
 // --- AUTO-GENERATED SETSTATE SWAP END
 
 #endif
 
 // --- AUTO-GENERATED SETSTATE APPLY START
-    fBitCrushAmount = savedBitCrushAmount;
-    fBitCrushLFO = savedBitCrushLFO;
+    fBitDepth = savedBitDepth;
+    fBitCrushLfo = savedBitCrushLfo;
+    fBitCrushLfoDepth = savedBitCrushLfoDepth;
+    fWetMix = savedWetMix;
+    fDryMix = savedDryMix;
 
 // --- AUTO-GENERATED SETSTATE APPLY END
 
@@ -299,8 +332,11 @@ tresult PLUGIN_API __PLUGIN_NAME__::getState( IBStream* state )
     // here we save the model values
 
 // --- AUTO-GENERATED GETSTATE START
-    float toSaveBitCrushAmount = fBitCrushAmount;
-    float toSaveBitCrushLFO = fBitCrushLFO;
+    float toSaveBitDepth = fBitDepth;
+    float toSaveBitCrushLfo = fBitCrushLfo;
+    float toSaveBitCrushLfoDepth = fBitCrushLfoDepth;
+    float toSaveWetMix = fWetMix;
+    float toSaveDryMix = fDryMix;
 
 // --- AUTO-GENERATED GETSTATE END
 
@@ -308,16 +344,22 @@ tresult PLUGIN_API __PLUGIN_NAME__::getState( IBStream* state )
 #if BYTEORDER == kBigEndian
 
 // --- AUTO-GENERATED GETSTATE SWAP START
-   SWAP_32( toSaveBitCrushAmount )
-   SWAP_32( toSaveBitCrushLFO )
+   SWAP_32( toSaveBitDepth )
+   SWAP_32( toSaveBitCrushLfo )
+   SWAP_32( toSaveBitCrushLfoDepth )
+   SWAP_32( toSaveWetMix )
+   SWAP_32( toSaveDryMix )
 
 // --- AUTO-GENERATED GETSTATE SWAP END
 
 #endif
 
 // --- AUTO-GENERATED GETSTATE APPLY START
-    state->write( &toSaveBitCrushAmount, sizeof( float ));
-    state->write( &toSaveBitCrushLFO, sizeof( float ));
+    state->write( &toSaveBitDepth, sizeof( float ));
+    state->write( &toSaveBitCrushLfo, sizeof( float ));
+    state->write( &toSaveBitCrushLfoDepth, sizeof( float ));
+    state->write( &toSaveWetMix, sizeof( float ));
+    state->write( &toSaveDryMix, sizeof( float ));
 
 // --- AUTO-GENERATED GETSTATE APPLY END
 
@@ -443,13 +485,12 @@ tresult PLUGIN_API __PLUGIN_NAME__::notify( IMessage* message )
 void __PLUGIN_NAME__::syncModel()
 {
     // forward the protected model values onto the plugin process and related processors
-    pluginProcess->bitCrusher->setAmount( fBitCrushAmount );
-    // when dealing with "bool"-types, use Calc::toBool() to determine on/off
-    pluginProcess->bitCrusher->setLFO(
-        // not very exciting, hard coded for this example
-        Calc::toBool( fBitCrushLFO ) ? .1f : 0.f,
-        Calc::toBool( fBitCrushLFO ) ? .5f : 0.f
-    );
+    // NOTE: when dealing with "bool"-types, use Calc::toBool() to determine on/off
+    pluginProcess->bitCrusher->setAmount( fBitDepth );
+    pluginProcess->bitCrusher->setLFO( fBitCrushLfo, fBitCrushLfoDepth );
+    // output mix
+    pluginProcess->setDryMix( fDryMix );
+    pluginProcess->setWetMix( fWetMix );
 }
 
 }

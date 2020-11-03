@@ -28,10 +28,8 @@ namespace Igorski {
 PluginProcess::PluginProcess( int amountOfChannels ) {
     _amountOfChannels = amountOfChannels;
 
-    // make these adjustable if you want dry/wet control
-
-    _dryMix = 0.f;
-    _wetMix = 1.f;
+    setDryMix( .5f );
+    setWetMix( .5f );
 
     // create the child processors
 
@@ -51,5 +49,13 @@ PluginProcess::~PluginProcess() {
 }
 
 /* setters */
+
+void PluginProcess::setDryMix( float value ) {
+    _dryMix = value;
+}
+
+void PluginProcess::setWetMix( float value ) {
+    _wetMix = value;
+}
 
 }

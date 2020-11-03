@@ -78,16 +78,40 @@ tresult PLUGIN_API PluginController::initialize( FUnknown* context )
 
 // --- AUTO-GENERATED START
 
-    RangeParameter* bitCrushAmountParam = new RangeParameter(
-        USTRING( "The amount of bit crushing applied" ), kBitCrushAmountId, USTRING( "percent" ),
+    RangeParameter* bitDepthParam = new RangeParameter(
+        USTRING( "Resolution" ), kBitDepthId, USTRING( "%" ),
+        0.f, 1.f, 1.f,
+        0, ParameterInfo::kCanAutomate, unitId
+    );
+    parameters.addParameter( bitDepthParam );
+
+    RangeParameter* bitCrushLfoParam = new RangeParameter(
+        USTRING( "Bit crush LFO" ), kBitCrushLfoId, USTRING( "Hz" ),
+        0.f, 10.f, 0.f,
+        0, ParameterInfo::kCanAutomate, unitId
+    );
+    parameters.addParameter( bitCrushLfoParam );
+
+    RangeParameter* bitCrushLfoDepthParam = new RangeParameter(
+        USTRING( "Bit crush LFO depth" ), kBitCrushLfoDepthId, USTRING( "%" ),
         0.f, 1.f, 0.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
-    parameters.addParameter( bitCrushAmountParam );
+    parameters.addParameter( bitCrushLfoDepthParam );
 
-    parameters.addParameter(
-        USTRING( "Enable / disable the BitCrusher LFO" ), 0, 1, 0, ParameterInfo::kCanAutomate, kBitCrushLFOId, unitId
+    RangeParameter* wetMixParam = new RangeParameter(
+        USTRING( "Wet mix" ), kWetMixId, USTRING( "%" ),
+        0.f, 1.f, 1.f,
+        0, ParameterInfo::kCanAutomate, unitId
     );
+    parameters.addParameter( wetMixParam );
+
+    RangeParameter* dryMixParam = new RangeParameter(
+        USTRING( "Dry mix" ), kDryMixId, USTRING( "%" ),
+        0.f, 1.f, 0.f,
+        0, ParameterInfo::kCanAutomate, unitId
+    );
+    parameters.addParameter( dryMixParam );
 
 // --- AUTO-GENERATED END
 
@@ -113,12 +137,24 @@ tresult PLUGIN_API PluginController::setComponentState( IBStream* state )
     {
 // --- AUTO-GENERATED SETSTATE START
 
-        float savedBitCrushAmount = 1.f;
-        if ( state->read( &savedBitCrushAmount, sizeof( float )) != kResultOk )
+        float savedBitDepth = 1.f;
+        if ( state->read( &savedBitDepth, sizeof( float )) != kResultOk )
             return kResultFalse;
 
-        float savedBitCrushLFO = 1.f;
-        if ( state->read( &savedBitCrushLFO, sizeof( float )) != kResultOk )
+        float savedBitCrushLfo = 1.f;
+        if ( state->read( &savedBitCrushLfo, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
+        float savedBitCrushLfoDepth = 1.f;
+        if ( state->read( &savedBitCrushLfoDepth, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
+        float savedWetMix = 1.f;
+        if ( state->read( &savedWetMix, sizeof( float )) != kResultOk )
+            return kResultFalse;
+
+        float savedDryMix = 1.f;
+        if ( state->read( &savedDryMix, sizeof( float )) != kResultOk )
             return kResultFalse;
 
 // --- AUTO-GENERATED SETSTATE END
@@ -126,15 +162,21 @@ tresult PLUGIN_API PluginController::setComponentState( IBStream* state )
 #if BYTEORDER == kBigEndian
 
 // --- AUTO-GENERATED SETSTATE SWAP START
-    SWAP_32( savedBitCrushAmount )
-    SWAP_32( savedBitCrushLFO )
+    SWAP_32( savedBitDepth )
+    SWAP_32( savedBitCrushLfo )
+    SWAP_32( savedBitCrushLfoDepth )
+    SWAP_32( savedWetMix )
+    SWAP_32( savedDryMix )
 
 // --- AUTO-GENERATED SETSTATE SWAP END
 
 #endif
 // --- AUTO-GENERATED SETSTATE SETPARAM START
-        setParamNormalized( kBitCrushAmountId, savedBitCrushAmount );
-        setParamNormalized( kBitCrushLFOId, savedBitCrushLFO );
+        setParamNormalized( kBitDepthId, savedBitDepth );
+        setParamNormalized( kBitCrushLfoId, savedBitCrushLfo );
+        setParamNormalized( kBitCrushLfoDepthId, savedBitCrushLfoDepth );
+        setParamNormalized( kWetMixId, savedWetMix );
+        setParamNormalized( kDryMixId, savedDryMix );
 
 // --- AUTO-GENERATED SETSTATE SETPARAM END
 
@@ -241,13 +283,28 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
 
 // --- AUTO-GENERATED GETPARAM START
 
-        case kBitCrushAmountId:
-            sprintf( text, "%.2f", ( float ) valueNormalized );
+        case kBitDepthId:
+            sprintf( text, "%.2d Bits", ( int ) ( 15 * valueNormalized ) + 1 );
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
-        case kBitCrushLFOId:
-            sprintf( text, "%s", ( valueNormalized == 0 ) ? "Off" : "On" );
+        case kBitCrushLfoId:
+            sprintf( text, "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
+            Steinberg::UString( string, 128 ).fromAscii( text );
+            return kResultTrue;
+
+        case kBitCrushLfoDepthId:
+            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            Steinberg::UString( string, 128 ).fromAscii( text );
+            return kResultTrue;
+
+        case kWetMixId:
+            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            Steinberg::UString( string, 128 ).fromAscii( text );
+            return kResultTrue;
+
+        case kDryMixId:
+            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 

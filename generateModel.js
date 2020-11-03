@@ -6,36 +6,64 @@
 // NOTE: all values are floats and while these are usually normalized to the 0 - 1 range, any arbitrary value is supported
 //
 // format: {
-//     name: String,       // used to calculate derived variable names from
-//     descr: String,      // description (exposed to user via host)
-//     unitDescr: String,  // meaningful description of the unit represented by this value (exposed to user via host)
+//     name: String,             // used to calculate derived variable names from
+//     descr: String,            // description (exposed to user via host)
+//     unitDescr: String,        // meaningful description of the unit represented by this value (exposed to user via host)
 //     value: {
 //         min: String|Number, // minimum value accepted for this parameter (fractional values require .f suffix)
 //         max: String|Number, // maximum value accepted for this parameter (fractional values require .f suffix)
-//         def: String|Number, // default value for this parameter (fractional values require .f suffix)
-//         type: String,       // optional, defaults to float, also accepts 'bool' where the value is either 0 or 1 (on/off)
+//         def: String|Number, // optional, default value for this parameter, falls back to min (fractional values require .f suffix)
+//         type: String,       // optional, defaults to float, accepts:
+//                             // 'bool' where the value is either 0 or 1 (on/off)
+//                             // 'pct' (multiplied by 100)
 //     },
 //     ui: {               // optional, when defined, will create entry in .uidesc
 //         x: Number,      // x, y coordinates and width and height of control
 //         y: Number,
 //         w: Number,
 //         h: Number.
-//     }
+//     },
+//     normalizedDescr: Boolean, // optional, whether to display the value in the host normalized (otherwise falls back to 0 - 1 range), defaults to false
+//     customDescr: String,      // optional, custom instruction used in controller.cpp to format value
 // }
 const MODEL = [
     {
-        name: 'bitCrushAmount',
-        descr: 'The amount of bit crushing applied',
-        unitDescr: 'percent',
-        value: { min: '0.f', max: '1.f', def: '0.f' },
-        ui: { x: 228, y: 157, w: 40, h: 40 },
+        name: 'bitDepth',
+        descr: 'Resolution',
+        unitDescr: '%',
+        value: { min: '0.f', max: '1.f', def: '1.f', type: 'percent' },
+        ui: { x: 199, y: 165, w: 104, h: 21 },
+        // note we treat full resolution as 16-bits (but is in fact whatever host is)
+        customDescr: 'sprintf( text, "%.2d Bits", ( int ) ( 15 * valueNormalized ) + 1 );'
     },
     {
-        name: 'bitCrushLFO',
-        descr: 'Enable / disable the BitCrusher LFO',
-        unitDescr: 'on/off',
-        value: { min: 0, max: 1, def: 0, type: 'bool' },
-        ui: { x: 10, y: 10, w: 50, h: 50 }
+        name: 'bitCrushLfo',
+        descr: 'Bit crush LFO',
+        unitDescr: 'Hz',
+        value: { min: '0.f', max: '10.f' },
+        ui: { x: 10, y: 90, w: 134, h: 21 },
+        normalizedDescr: true
+    },
+    {
+        name: 'bitCrushLfoDepth',
+        descr: 'Bit crush LFO depth',
+        unitDescr: '%',
+        value: { min: '0.f', max: '1.f', type: 'percent' },
+        ui: { x: 10, y: 120, w: 134, h: 21 }
+    },
+    {
+        name: 'wetMix',
+        descr: 'Wet mix',
+        unitDescr: '%',
+        value: { min: '0.f', max: '1.f', def: '1.f', type: 'percent' },
+        ui: { x: 10, y: 150, w: 134, h: 21 }
+    },
+    {
+        name: 'dryMix',
+        descr: 'Dry mix',
+        unitDescr: '%',
+        value: { min: '0.f', max: '1.f', type: 'percent' },
+        ui: { x: 10, y: 180, w: 134, h: 21 }
     }
 ];
 
@@ -110,7 +138,7 @@ function generateVstHeader() {
     MODEL.forEach( entry => {
         const { descr, value } = entry;
         const { model } = generateNamesForParam( entry );
-        const line = `        float ${model} = ${value.def};    // ${descr}`;
+        const line = `        float ${model} = ${value.def ?? value.min};    // ${descr}`;
         lines.push( line );
     });
     fs.writeFileSync( outputFile, replaceContent( fileData, lines ));
@@ -131,14 +159,14 @@ function generateVstImpl() {
     MODEL.forEach( entry => {
         const { model, paramId, saved, toSave } = generateNamesForParam( entry );
 
-        // 1. __PLUGIN_NAME__::process
+        // 1. Homecorrupter::process
         processLines.push(`
                     case ${paramId}:
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
                             ${model} = ( float ) value;
                         break;`);
 
-        // 2. __PLUGIN_NAME__::setState
+        // 2. Homecorrupter::setState
 
         setStateLines.push(`
     float ${saved} = 0.f;
@@ -148,7 +176,7 @@ function generateVstImpl() {
         setStateSwapLines.push(`   SWAP_32( ${saved} )`);   // byte swap
         setStateApplyLines.push(`    ${model} = ${saved};`); // assignment to model
 
-        // 3. __PLUGIN_NAME__::getState
+        // 3. Homecorrupter::getState
 
         getStateLines.push(`    float ${toSave} = ${model};`);
         getStateSwapLines.push(`   SWAP_32( ${toSave} )`);   // byte swap
@@ -198,9 +226,13 @@ function generateController() {
     let line;
 
     MODEL.forEach( entry => {
-        const { descr, unitDescr }      = entry;
-        const { min, max, def, type }   = entry.value;
         const { param, paramId, saved } = generateNamesForParam( entry );
+        const { descr, unitDescr, normalizedDescr, customDescr } = entry;
+
+        let { min, max, def, type } = entry.value;
+        if ( !def ) {
+            def = min;
+        }
 
         // 1. PluginController::initialize
 
@@ -239,9 +271,18 @@ function generateController() {
         line = `
         case ${paramId}:`;
 
-        if ( type === 'bool' ) {
+        if ( customDescr ) {
+           line += `
+            ${customDescr}`;
+        } else if ( type === 'bool' ) {
             line += `
             sprintf( text, "%s", ( valueNormalized == 0 ) ? "Off" : "On" );`;
+        } else if ( type === 'percent' ) {
+            line += `
+            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));`;
+        } else if ( normalizedDescr ) {
+            line += `
+            sprintf( text, "%.2f ${unitDescr}", normalizedParamToPlain( tag, valueNormalized ));`;
         } else {
             line += `
             sprintf( text, "%.2f", ( float ) valueNormalized );`;
@@ -284,9 +325,12 @@ function generateUI() {
     MODEL.filter(entry => !!entry.ui)
          .forEach(( entry, index ) =>
     {
-        const { x, y, w, h }          = entry.ui;
-        const { min, max, def, type } = entry.value;
-        const { descr }               = entry;
+        const { x, y, w, h } = entry.ui;
+        const { descr }      = entry;
+        let { min, max, def, type } = entry.value;
+        if ( !def ) {
+            def = min;
+        }
 
         const { param } = generateNamesForParam( entry );
         let control;

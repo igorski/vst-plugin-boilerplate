@@ -44,6 +44,13 @@ class PluginProcess {
             int bufferSize, uint32 sampleFramesSize
         );
 
+        // setters
+
+        void setDryMix( float value );
+        void setWetMix( float value );
+
+        // child processors
+
         BitCrusher* bitCrusher;
         Limiter* limiter;
 

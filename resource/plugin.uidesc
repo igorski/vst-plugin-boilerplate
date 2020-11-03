@@ -12,8 +12,30 @@
 
 <!-- AUTO-GENERATED CONTROLS START -->
 
-        <!-- The amount of bit crushing applied -->
-        <view control-tag="Unit1::bitCrushAmountParam" class="CSlider" origin="228, 157" size="40, 40"
+        <!-- Resolution -->
+        <view control-tag="Unit1::bitDepthParam" class="CSlider" origin="199, 165" size="104, 21"
+              max-value="1.f" min-value="0.f" default-value="1.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+        <!-- Bit crush LFO -->
+        <view control-tag="Unit1::bitCrushLfoParam" class="CSlider" origin="10, 90" size="134, 21"
+              max-value="10.f" min-value="0.f" default-value="0.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+        <!-- Bit crush LFO depth -->
+        <view control-tag="Unit1::bitCrushLfoDepthParam" class="CSlider" origin="10, 120" size="134, 21"
               max-value="1.f" min-value="0.f" default-value="0.f"
               background-offset="0, 0" bitmap="slider_background"
               bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
@@ -23,15 +45,26 @@
               transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
         />
 
-        <!-- Enable / disable the BitCrusher LFO -->
-        <view control-tag="Unit1::bitCrushLFOParam" class="CCheckBox" origin="10, 10" size="50, 50"
-              max-value="1" min-value="0" default-value="0"
-              background-offset="0, 0" boxfill-color="~ GreenCColor" autosize="bottom"
-              boxframe-color="~ BlackCColor" checkmark-color="~ BlackCColor"
-              draw-crossbox="true" font="~ NormalFontSmall" font-color="Light Grey"
-              autosize-to-fit="false" frame-width="1"
-              mouse-enabled="true" opacity="1" round-rect-radius="0"
-              title="Enable / disable the BitCrusher LFO" transparent="false" wants-focus="true" wheel-inc-value="0.1"
+        <!-- Wet mix -->
+        <view control-tag="Unit1::wetMixParam" class="CSlider" origin="10, 150" size="134, 21"
+              max-value="1.f" min-value="0.f" default-value="1.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+        <!-- Dry mix -->
+        <view control-tag="Unit1::dryMixParam" class="CSlider" origin="10, 180" size="134, 21"
+              max-value="1.f" min-value="0.f" default-value="0.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
         />
 
 <!-- AUTO-GENERATED CONTROLS END -->
@@ -72,8 +105,11 @@
         <control-tag name="UI::SendMessage" tag="1000"/>
 
 <!-- AUTO-GENERATED TAGS START -->
-       <control-tag name="Unit1::bitCrushAmountParam" tag="0" />
-       <control-tag name="Unit1::bitCrushLFOParam" tag="1" />
+       <control-tag name="Unit1::bitDepthParam" tag="0" />
+       <control-tag name="Unit1::bitCrushLfoParam" tag="1" />
+       <control-tag name="Unit1::bitCrushLfoDepthParam" tag="2" />
+       <control-tag name="Unit1::wetMixParam" tag="3" />
+       <control-tag name="Unit1::dryMixParam" tag="4" />
 
 <!-- AUTO-GENERATED TAGS END -->
     </control-tags>
