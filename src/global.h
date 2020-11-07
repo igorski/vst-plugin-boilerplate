@@ -13,10 +13,11 @@ namespace VST {
     static const char* NAME     = "__PLUGIN_NAME__";
     static const char* VENDOR   = "igorski.nl";
 
-    // generate unique UIDs for these
-    static const FUID PluginProcessorUID( 0xD9995465, 0xFFF74B54, 0xA6AFDDE5, 0x9A615AD3 );
-    static const FUID PluginWithSideChainProcessorUID( 0x528F457D, 0xBA31BDFB, 0x70A7A2DA, 0x31C358F3 );
-    static const FUID PluginControllerUID( 0xCF48474A, 0xB7E202CD, 0x66D160D9, 0xF99D622B );
+    // generate unique UIDs for these (www.uuidgenerator.net is great for this)
+
+    static const FUID PluginProcessorUID( 0xC6E40BB6, 0x717148FB, 0x92700948, 0x0C47f4E8 );
+    static const FUID PluginWithSideChainProcessorUID( 0x717148FB, 0x92700948, 0x0C47f4E8, 0xC6E40BB6 );
+    static const FUID PluginControllerUID( 0x92700948, 0x0C47f4E8, 0xC6E40BB6, 0x717148FB );
 
     extern float SAMPLE_RATE; // set upon initialization, see vst.cpp
 
