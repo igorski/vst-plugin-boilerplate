@@ -284,7 +284,7 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
 // --- AUTO-GENERATED GETPARAM START
 
         case kBitDepthId:
-            sprintf( text, "%.2d Bits", ( int ) ( 15 * valueNormalized ) + 1 );
+            sprintf( text, "%.d Bits", ( int ) ( 15 * valueNormalized ) + 1 );
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
