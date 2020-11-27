@@ -1,6 +1,13 @@
+# vst-plugin-boilerplate
+## Checklist before releasing plugin
+
+ * register unique UIDs for the controller defined in _./src/global.h_
+ * replace instances of \__PLUGIN_NAME\__ with your plugins name (without spaces)
+ * everything described in the README below w/ regards to plugin types
+
 # __PLUGIN_NAME__
 
-__PLUGIN_NAME__ is a VST/AU plug-in which provides a
+__PLUGIN_NAME__ is a VST/AU plug-in which provides... [description goes here]
 
 ## On compatibility
 
