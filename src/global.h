@@ -9,7 +9,7 @@ using namespace Steinberg;
 namespace Igorski {
 namespace VST {
 
-    static const int   ID       = 97151818;
+    static const int   ID       = 12345678;
     static const char* NAME     = "__PLUGIN_NAME__";
     static const char* VENDOR   = "igorski.nl";
 

@@ -1,6 +1,7 @@
 # vst-plugin-boilerplate
 ## Checklist before releasing plugin
 
+ * register unique ID for the plugin in _./src/global.h_
  * register unique UIDs for the controller defined in _./src/global.h_
  * replace instances of \__PLUGIN_NAME\__ with your plugins name (without spaces)
  * everything described in the README below w/ regards to plugin types
