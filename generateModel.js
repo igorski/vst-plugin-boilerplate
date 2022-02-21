@@ -15,7 +15,7 @@
 //         def: String|Number, // optional, default value for this parameter, falls back to min (fractional values require .f suffix)
 //         type: String,       // optional, defaults to float, accepts:
 //                             // 'bool' where the value is either 0 or 1 (on/off)
-//                             // 'pct' (multiplied by 100)
+//                             // 'percent' (multiplied by 100)
 //     },
 //     ui: {               // optional, when defined, will create entry in .uidesc
 //         x: Number,      // x, y coordinates and width and height of control
