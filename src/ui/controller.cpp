@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2022 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -30,6 +30,7 @@
 #include "pluginterfaces/vst/ivstmidicontrollers.h"
 
 #include "base/source/fstring.h"
+#include "base/source/fstreamer.h"
 
 #include "vstgui/uidescription/delegationcontroller.h"
 
@@ -113,6 +114,7 @@ tresult PLUGIN_API PluginController::initialize( FUnknown* context )
     );
     parameters.addParameter( dryMixParam );
 
+
 // --- AUTO-GENERATED END
 
     // initialization
@@ -133,55 +135,43 @@ tresult PLUGIN_API PluginController::terminate()
 tresult PLUGIN_API PluginController::setComponentState( IBStream* state )
 {
     // we receive the current state of the component (processor part)
-    if ( state )
-    {
-// --- AUTO-GENERATED SETSTATE START
+    if ( !state )
+        return kResultFalse;
 
-        float savedBitDepth = 1.f;
-        if ( state->read( &savedBitDepth, sizeof( float )) != kResultOk )
-            return kResultFalse;
+    IBStreamer streamer( state, kLittleEndian );
 
-        float savedBitCrushLfo = 1.f;
-        if ( state->read( &savedBitCrushLfo, sizeof( float )) != kResultOk )
-            return kResultFalse;
+// --- AUTO-GENERATED SETCOMPONENTSTATE START
 
-        float savedBitCrushLfoDepth = 1.f;
-        if ( state->read( &savedBitCrushLfoDepth, sizeof( float )) != kResultOk )
-            return kResultFalse;
+    float savedBitDepth = 1.f;
+    if ( streamer.readFloat( savedBitDepth ) == false )
+        return kResultFalse;
+    setParamNormalized( kBitDepthId, savedBitDepth );
 
-        float savedWetMix = 1.f;
-        if ( state->read( &savedWetMix, sizeof( float )) != kResultOk )
-            return kResultFalse;
+    float savedBitCrushLfo = 0.f;
+    if ( streamer.readFloat( savedBitCrushLfo ) == false )
+        return kResultFalse;
+    setParamNormalized( kBitCrushLfoId, savedBitCrushLfo );
 
-        float savedDryMix = 1.f;
-        if ( state->read( &savedDryMix, sizeof( float )) != kResultOk )
-            return kResultFalse;
+    float savedBitCrushLfoDepth = 0.f;
+    if ( streamer.readFloat( savedBitCrushLfoDepth ) == false )
+        return kResultFalse;
+    setParamNormalized( kBitCrushLfoDepthId, savedBitCrushLfoDepth );
 
-// --- AUTO-GENERATED SETSTATE END
+    float savedWetMix = 1.f;
+    if ( streamer.readFloat( savedWetMix ) == false )
+        return kResultFalse;
+    setParamNormalized( kWetMixId, savedWetMix );
 
-#if BYTEORDER == kBigEndian
+    float savedDryMix = 0.f;
+    if ( streamer.readFloat( savedDryMix ) == false )
+        return kResultFalse;
+    setParamNormalized( kDryMixId, savedDryMix );
 
-// --- AUTO-GENERATED SETSTATE SWAP START
-    SWAP_32( savedBitDepth )
-    SWAP_32( savedBitCrushLfo )
-    SWAP_32( savedBitCrushLfoDepth )
-    SWAP_32( savedWetMix )
-    SWAP_32( savedDryMix )
 
-// --- AUTO-GENERATED SETSTATE SWAP END
+// --- AUTO-GENERATED SETCOMPONENTSTATE END
 
-#endif
-// --- AUTO-GENERATED SETSTATE SETPARAM START
-        setParamNormalized( kBitDepthId, savedBitDepth );
-        setParamNormalized( kBitCrushLfoId, savedBitCrushLfo );
-        setParamNormalized( kBitCrushLfoDepthId, savedBitCrushLfoDepth );
-        setParamNormalized( kWetMixId, savedWetMix );
-        setParamNormalized( kDryMixId, savedDryMix );
+    state->seek( sizeof ( float ), IBStream::kIBSeekCur );
 
-// --- AUTO-GENERATED SETSTATE SETPARAM END
-
-        state->seek( sizeof ( float ), IBStream::kIBSeekCur );
-    }
     return kResultOk;
 }
 
@@ -214,41 +204,44 @@ IController* PluginController::createSubController( UTF8StringPtr name,
 //------------------------------------------------------------------------
 tresult PLUGIN_API PluginController::setState( IBStream* state )
 {
-    tresult result = kResultFalse;
+	IBStreamer streamer( state, kLittleEndian );
 
-    int8 byteOrder;
-    if (( result = state->read( &byteOrder, sizeof( int8 ))) != kResultTrue )
-        return result;
+	int8 byteOrder;
+	if ( streamer.readInt8( byteOrder ) == false )
+		return kResultFalse;
+	if ( streamer.readRaw( defaultMessageText, 128 * sizeof( TChar )) == false )
+		return kResultFalse;
 
-    if (( result = state->read( defaultMessageText, 128 * sizeof( TChar ))) != kResultTrue )
-        return result;
+	// if the byteorder doesn't match, byte swap the text array ...
+	if ( byteOrder != BYTEORDER ) {
+		for ( int32 i = 0; i < 128; i++ ) {
+			SWAP_16( defaultMessageText[ i ]);
+		}
+	}
 
-    // if the byteorder doesn't match, byte swap the text array ...
-    if ( byteOrder != BYTEORDER )
-    {
-        for ( int32 i = 0; i < 128; i++ )
-            SWAP_16( defaultMessageText[ i ])
-    }
+	// update our editors
+	for ( auto & uiMessageController : uiMessageControllers )
+		uiMessageController->setMessageText( defaultMessageText );
 
-    // update our editors
-    for ( UIMessageControllerList::iterator it = uiMessageControllers.begin (), end = uiMessageControllers.end (); it != end; ++it )
-        ( *it )->setMessageText( defaultMessageText );
-
-    return result;
+	return kResultTrue;
 }
 
 //------------------------------------------------------------------------
 tresult PLUGIN_API PluginController::getState( IBStream* state )
 {
-    // here we can save UI settings for example
+	// here we can save UI settings for example
+	// as we save a Unicode string, we must know the byteorder when setState is called
 
-    // as we save a Unicode string, we must know the byteorder when setState is called
-    int8 byteOrder = BYTEORDER;
-    if ( state->write( &byteOrder, sizeof( int8 )) == kResultTrue )
-    {
-        return state->write( defaultMessageText, 128 * sizeof( TChar ));
-    }
-    return kResultFalse;
+	IBStreamer streamer( state, kLittleEndian );
+
+	int8 byteOrder = BYTEORDER;
+	if ( streamer.writeInt8( byteOrder ) == false )
+		return kResultFalse;
+
+	if ( streamer.writeRaw( defaultMessageText, 128 * sizeof( TChar )) == false )
+		return kResultFalse;
+
+	return kResultTrue;
 }
 
 //------------------------------------------------------------------------
@@ -280,7 +273,6 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
     // simply read the normalized value which is in the same range
     switch ( tag )
     {
-
 // --- AUTO-GENERATED GETPARAM START
 
         case kBitDepthId:
@@ -307,6 +299,7 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
             sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
+
 
 // --- AUTO-GENERATED GETPARAM END
 

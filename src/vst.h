@@ -88,6 +88,7 @@ class __PLUGIN_NAME__ : public AudioEffect
         // (normalized) RangeParameter values
 
 // --- AUTO-GENERATED START
+
         float fBitDepth = 1.f;    // Resolution
         float fBitCrushLfo = 0.f;    // Bit crush LFO
         float fBitCrushLfoDepth = 0.f;    // Bit crush LFO depth

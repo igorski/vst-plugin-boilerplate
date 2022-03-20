@@ -28,55 +28,55 @@
 // }
 const MODEL = [
     {
-        name: 'bitDepth',
-        descr: 'Resolution',
-        unitDescr: '%',
-        value: { min: '0.f', max: '1.f', def: '1.f', type: 'percent' },
+        name: "bitDepth",
+        descr: "Resolution",
+        unitDescr: "%",
+        value: { min: "0.f", max: "1.f", def: "1.f", type: "percent" },
         ui: { x: 199, y: 165, w: 104, h: 21 },
         // note we treat full resolution as 16-bits (but is in fact whatever host is)
-        customDescr: 'sprintf( text, "%.d Bits", ( int ) ( 15 * valueNormalized ) + 1 );'
+        customDescr: `sprintf( text, "%.d Bits", ( int ) ( 15 * valueNormalized ) + 1 );`
     },
     {
-        name: 'bitCrushLfo',
-        descr: 'Bit crush LFO',
-        unitDescr: 'Hz',
-        value: { min: '0.f', max: '10.f' },
+        name: "bitCrushLfo",
+        descr: "Bit crush LFO",
+        unitDescr: "Hz",
+        value: { min: "0.f", max: "10.f" },
         ui: { x: 10, y: 90, w: 134, h: 21 },
         normalizedDescr: true
     },
     {
-        name: 'bitCrushLfoDepth',
-        descr: 'Bit crush LFO depth',
-        unitDescr: '%',
-        value: { min: '0.f', max: '1.f', type: 'percent' },
+        name: "bitCrushLfoDepth",
+        descr: "Bit crush LFO depth",
+        unitDescr: "%",
+        value: { min: "0.f", max: "1.f", type: "percent" },
         ui: { x: 10, y: 120, w: 134, h: 21 }
     },
     {
-        name: 'wetMix',
-        descr: 'Wet mix',
-        unitDescr: '%',
-        value: { min: '0.f', max: '1.f', def: '1.f', type: 'percent' },
+        name: "wetMix",
+        descr: "Wet mix",
+        unitDescr: "%",
+        value: { min: "0.f", max: "1.f", def: "1.f", type: "percent" },
         ui: { x: 10, y: 150, w: 134, h: 21 }
     },
     {
-        name: 'dryMix',
-        descr: 'Dry mix',
-        unitDescr: '%',
-        value: { min: '0.f', max: '1.f', type: 'percent' },
+        name: "dryMix",
+        descr: "Dry mix",
+        unitDescr: "%",
+        value: { min: "0.f", max: "1.f", type: "percent" },
         ui: { x: 10, y: 180, w: 134, h: 21 }
     }
 ];
 
 // DO NOT CHANGE BELOW
 
-const fs = require( 'fs' );
+const fs = require( "fs" );
 
-const SOURCE_FOLDER      = './src';
-const RESOURCE_FOLDER    = './resource';
-const START_OF_OUTPUT_ID = '// --- AUTO-GENERATED START';
-const END_OF_OUTPUT_ID   = '// --- AUTO-GENERATED END';
+const SOURCE_FOLDER      = "./src";
+const RESOURCE_FOLDER    = "./resource";
+const START_OF_OUTPUT_ID = "// --- AUTO-GENERATED START";
+const END_OF_OUTPUT_ID   = "// --- AUTO-GENERATED END";
 
-function replaceContent( fileData, lineContent, startId = START_OF_OUTPUT_ID, endId = END_OF_OUTPUT_ID ) {
+function replaceContent( fileData, lineContent = [], startId = START_OF_OUTPUT_ID, endId = END_OF_OUTPUT_ID ) {
     // first generate the appropriate regular expression
     // result with default values should equal /(\/\/ AUTO-GENERATED START)([\s\S]*?)(\/\/ AUTO-GENERATED END)/g
     const regex = new RegExp( `(${startId.replace(/\//g, '\\/')})([\\s\\S]*?)(${endId.replace(/\//g, '\\/')})`, 'g' );
@@ -87,11 +87,14 @@ function replaceContent( fileData, lineContent, startId = START_OF_OUTPUT_ID, en
         return fileData;
     }
     // format the output as a String
-    const output = `${startId}
-${lineContent.join( '\n' )}\n
+    const output = `${startId}\n\n${lineContent.join( "" )}
 ${endId}`;
 
     return fileData.replace( dataToReplace, output );
+}
+
+function getType( entry ) {
+    return entry.value?.type || undefined;
 }
 
 function generateNamesForParam({ name }) {
@@ -124,7 +127,7 @@ function generateParamIds() {
     MODEL.forEach(( entry, index ) => {
         const { descr } = entry;
         const { paramId } = generateNamesForParam( entry );
-        const line = `    ${paramId} = ${index},    // ${descr}`;
+        const line = `    ${paramId} = ${index},    // ${descr}\n`;
         lines.push( line );
     });
     fs.writeFileSync( outputFile, replaceContent( fileData, lines ));
@@ -138,49 +141,72 @@ function generateVstHeader() {
     MODEL.forEach( entry => {
         const { descr, value } = entry;
         const { model } = generateNamesForParam( entry );
-        const line = `        float ${model} = ${value.def ?? value.min};    // ${descr}`;
-        lines.push( line );
+        const type = getType( entry );
+        let line;
+        if ( type === "bool" ) {
+            line = `        bool ${model} = ${!!parseFloat( value.def > 0.5 )};    // ${descr}`;
+        } else {
+            line = `        float ${model} = ${value.def ?? value.min};    // ${descr}`;
+        }
+        lines.push( `${line}\n` );
     });
     fs.writeFileSync( outputFile, replaceContent( fileData, lines ));
 }
 
 function generateVstImpl() {
     const outputFile = `${SOURCE_FOLDER}/vst.cpp`;
-    let fileData     = fs.readFileSync( outputFile, { encoding:'utf8', flag:'r' });
+    let fileData     = fs.readFileSync( outputFile, { encoding: "utf8", flag: "r" });
 
     const processLines = [];
     const setStateLines = [];
-    const setStateSwapLines = [];
     const setStateApplyLines = [];
     const getStateLines = [];
-    const getStateSwapLines = [];
-    const getStateApplyLines = [];
 
     MODEL.forEach( entry => {
         const { model, paramId, saved, toSave } = generateNamesForParam( entry );
+        const type = getType( entry );
 
-        // 1. __PLUGIN_NAME__::process
-        processLines.push(`
+        if ( type === "bool" ) {
+            // 1. __PLUGIN_NAME__::process
+            processLines.push(`
+                    case ${paramId}:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            ${model} = ( value > 0.5f );
+                        break;\n`);
+
+            // 2. __PLUGIN_NAME__::setState
+
+            setStateLines.push(`    int32 ${saved} = 0;
+    if ( streamer.readInt32( ${saved} ) == false )
+        return kResultFalse;\n\n`
+            );
+            setStateApplyLines.push(`    ${model} = ${saved} > 0;\n`); // assignment to model
+
+            // 3. __PLUGIN_NAME__::getState
+
+            getStateLines.push(`    streamer.writeInt32( ${model} ? 1 : 0 );\n` );
+
+        } else {
+
+            // 1. __PLUGIN_NAME__::process
+            processLines.push(`
                     case ${paramId}:
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
                             ${model} = ( float ) value;
-                        break;`);
+                        break;\n`);
 
-        // 2. __PLUGIN_NAME__::setState
+            // 2. __PLUGIN_NAME__::setState
 
-        setStateLines.push(`
-    float ${saved} = 0.f;
-    if ( state->read( &${saved}, sizeof ( float )) != kResultOk )
-        return kResultFalse;`);
+            setStateLines.push(`    float ${saved} = 0.f;
+    if ( streamer.readFloat( ${saved} ) == false )
+        return kResultFalse;\n\n`
+            );
+            setStateApplyLines.push(`    ${model} = ${saved};\n`); // assignment to model
 
-        setStateSwapLines.push(`   SWAP_32( ${saved} )`);   // byte swap
-        setStateApplyLines.push(`    ${model} = ${saved};`); // assignment to model
+            // 3. __PLUGIN_NAME__::getState
 
-        // 3. __PLUGIN_NAME__::getState
-
-        getStateLines.push(`    float ${toSave} = ${model};`);
-        getStateSwapLines.push(`   SWAP_32( ${toSave} )`);   // byte swap
-        getStateApplyLines.push(`    state->write( &${toSave}, sizeof( float ));` );
+            getStateLines.push(`    streamer.writeFloat( ${model} );\n` );
+        }
     });
 
     let startId = '// --- AUTO-GENERATED PROCESS START';
@@ -191,10 +217,6 @@ function generateVstImpl() {
     endId   = '// --- AUTO-GENERATED SETSTATE END';
     fileData = replaceContent( fileData, setStateLines, startId, endId );
 
-    startId = '// --- AUTO-GENERATED SETSTATE SWAP START';
-    endId   = '// --- AUTO-GENERATED SETSTATE SWAP END';
-    fileData = replaceContent( fileData, setStateSwapLines, startId, endId );
-
     startId = '// --- AUTO-GENERATED SETSTATE APPLY START';
     endId   = '// --- AUTO-GENERATED SETSTATE APPLY END';
     fileData = replaceContent( fileData, setStateApplyLines, startId, endId );
@@ -202,14 +224,6 @@ function generateVstImpl() {
     startId = '// --- AUTO-GENERATED GETSTATE START';
     endId   = '// --- AUTO-GENERATED GETSTATE END';
     fileData = replaceContent( fileData, getStateLines, startId, endId );
-
-    startId = '// --- AUTO-GENERATED GETSTATE SWAP START';
-    endId   = '// --- AUTO-GENERATED GETSTATE SWAP END';
-    fileData = replaceContent( fileData, getStateSwapLines, startId, endId );
-
-    startId = '// --- AUTO-GENERATED GETSTATE APPLY START';
-    endId   = '// --- AUTO-GENERATED GETSTATE APPLY END';
-    fileData = replaceContent( fileData, getStateApplyLines, startId, endId );
 
     fs.writeFileSync( outputFile, fileData );
 }
@@ -220,64 +234,63 @@ function generateController() {
 
     const initLines = [];
     const setStateLines = [];
-    const setStateSwapLines = [];
-    const setStateSetParamLines = [];
     const getParamLines = [];
     let line;
 
     MODEL.forEach( entry => {
         const { param, paramId, saved } = generateNamesForParam( entry );
         const { descr, unitDescr, normalizedDescr, customDescr } = entry;
-
-        let { min, max, def, type } = entry.value;
+        const type = getType( entry );
+        let { min, max, def } = entry.value;
         if ( !def ) {
             def = min;
         }
 
         // 1. PluginController::initialize
 
-        if ( type === 'bool' ) {
+        if ( type === "bool" ) {
             line = `
     parameters.addParameter(
         USTRING( "${descr}" ), ${min}, ${max}, ${def}, ParameterInfo::kCanAutomate, ${paramId}, unitId
-    );`;
+    );\n\n`;
         } else {
-            line = `
-    RangeParameter* ${param} = new RangeParameter(
+            line = `    RangeParameter* ${param} = new RangeParameter(
         USTRING( "${descr}" ), ${paramId}, USTRING( "${unitDescr}" ),
         ${min}, ${max}, ${def},
         0, ParameterInfo::kCanAutomate, unitId
     );
-    parameters.addParameter( ${param} );`;
+    parameters.addParameter( ${param} );\n\n`;
         }
         initLines.push( line );
 
         // 2. PluginController::setComponentState
 
-        setStateLines.push(`
-        float ${saved} = 1.f;
-        if ( state->read( &${saved}, sizeof( float )) != kResultOk )
-            return kResultFalse;`);
-
-        // endian swap
-        setStateSwapLines.push(`    SWAP_32( ${saved} )`);
-
-        // set param normalized
-        setStateSetParamLines.push(`        setParamNormalized( ${paramId}, ${saved} );`);
+        if ( type === "bool" ) {
+            setStateLines.push(`    int32 ${saved} = ${parseInt( def )};
+    if ( streamer.readInt32( ${saved} ) == false )
+        return kResultFalse;
+    setParamNormalized( ${paramId}, ${saved} ? 1 : 0 );\n\n`
+            );
+        } else {
+            setStateLines.push(`    float ${saved} = ${def || "0.f" };
+    if ( streamer.readFloat( ${saved} ) == false )
+        return kResultFalse;
+    setParamNormalized( ${paramId}, ${saved} );\n\n`
+            );
+        }
 
         // 3. PluginController::getParamStringByValue
         // TODO: we can optimize this by grouping case values
 
-        line = `
-        case ${paramId}:`;
+        line = `        case ${paramId}:`;
 
         if ( customDescr ) {
            line += `
             ${customDescr}`;
-        } else if ( type === 'bool' ) {
+        } else if ( type === "bool" ) {
             line += `
             sprintf( text, "%s", ( valueNormalized == 0 ) ? "Off" : "On" );`;
-        } else if ( type === 'percent' ) {
+        } else if ( type === "percent" ) {
             line += `
             sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));`;
         } else if ( normalizedDescr ) {
@@ -290,23 +303,15 @@ function generateController() {
 
         line += `
             Steinberg::UString( string, 128 ).fromAscii( text );
-            return kResultTrue;`;
+            return kResultTrue;\n\n`;
 
         getParamLines.push( line );
     });
     fileData = replaceContent( fileData, initLines );
 
-    let startId = '// --- AUTO-GENERATED SETSTATE START';
-    let endId   = '// --- AUTO-GENERATED SETSTATE END';
+    let startId = '// --- AUTO-GENERATED SETCOMPONENTSTATE START';
+    let endId   = '// --- AUTO-GENERATED SETCOMPONENTSTATE END';
     fileData = replaceContent( fileData, setStateLines, startId, endId );
-
-    startId = '// --- AUTO-GENERATED SETSTATE SWAP START';
-    endId   = '// --- AUTO-GENERATED SETSTATE SWAP END';
-    fileData = replaceContent( fileData, setStateSwapLines, startId, endId );
-
-    startId = '// --- AUTO-GENERATED SETSTATE SETPARAM START';
-    endId   = '// --- AUTO-GENERATED SETSTATE SETPARAM END';
-    fileData = replaceContent( fileData, setStateSetParamLines, startId, endId );
 
     startId = '// --- AUTO-GENERATED GETPARAM START';
     endId   = '// --- AUTO-GENERATED GETPARAM END';
@@ -336,7 +341,8 @@ function generateUI() {
         let control;
 
         if ( type === 'bool' ) {
-            control = `<view control-tag="Unit1::${param}" class="CCheckBox" origin="${x}, ${y}" size="${w}, ${h}"
+            control = `<view
+              control-tag="Unit1::${param}" class="CCheckBox" origin="${x}, ${y}" size="${w}, ${h}"
               max-value="${max}" min-value="${min}" default-value="${def}"
               background-offset="0, 0" boxfill-color="~ GreenCColor" autosize="bottom"
               boxframe-color="~ BlackCColor" checkmark-color="~ BlackCColor"
@@ -346,7 +352,8 @@ function generateUI() {
               title="${descr}" transparent="false" wants-focus="true" wheel-inc-value="0.1"
         />`;
         } else {
-            control = `<view control-tag="Unit1::${param}" class="CSlider" origin="${x}, ${y}" size="${w}, ${h}"
+            control = `<view
+              control-tag="Unit1::${param}" class="CSlider" origin="${x}, ${y}" size="${w}, ${h}"
               max-value="${max}" min-value="${min}" default-value="${def}"
               background-offset="0, 0" bitmap="slider_background"
               bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
@@ -360,7 +367,7 @@ function generateUI() {
         <!-- ${descr} -->
         ${control}` );
 
-        tagLines.push(`       <control-tag name="Unit1::${param}" tag="${index}" />` );
+        tagLines.push(`       <control-tag name="Unit1::${param}" tag="${index}" />\n` );
     });
 
     let startId = '<!-- AUTO-GENERATED CONTROLS START -->';

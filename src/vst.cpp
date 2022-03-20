@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2022 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -32,6 +32,8 @@
 #include "pluginterfaces/vst/ivstevents.h"
 #include "pluginterfaces/vst/ivstparameterchanges.h"
 #include "pluginterfaces/vst/vstpresetkeys.h"
+
+#include "base/source/fstreamer.h"
 
 #include <stdio.h>
 
@@ -127,6 +129,7 @@ tresult PLUGIN_API __PLUGIN_NAME__::process( ProcessData& data )
                 switch ( paramQueue->getParameterId())
                 {
 // --- AUTO-GENERATED PROCESS START
+
 
                     case kBitDepthId:
                         if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
@@ -247,44 +250,35 @@ tresult PLUGIN_API __PLUGIN_NAME__::setState( IBStream* state )
 {
     // called when we load a preset, the model has to be reloaded
 
+    IBStreamer streamer( state, kLittleEndian );
+
 // --- AUTO-GENERATED SETSTATE START
 
     float savedBitDepth = 0.f;
-    if ( state->read( &savedBitDepth, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedBitDepth ) == false )
         return kResultFalse;
 
     float savedBitCrushLfo = 0.f;
-    if ( state->read( &savedBitCrushLfo, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedBitCrushLfo ) == false )
         return kResultFalse;
 
     float savedBitCrushLfoDepth = 0.f;
-    if ( state->read( &savedBitCrushLfoDepth, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedBitCrushLfoDepth ) == false )
         return kResultFalse;
 
     float savedWetMix = 0.f;
-    if ( state->read( &savedWetMix, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedWetMix ) == false )
         return kResultFalse;
 
     float savedDryMix = 0.f;
-    if ( state->read( &savedDryMix, sizeof ( float )) != kResultOk )
+    if ( streamer.readFloat( savedDryMix ) == false )
         return kResultFalse;
+
 
 // --- AUTO-GENERATED SETSTATE END
 
-#if BYTEORDER == kBigEndian
-
-// --- AUTO-GENERATED SETSTATE SWAP START
-   SWAP_32( savedBitDepth )
-   SWAP_32( savedBitCrushLfo )
-   SWAP_32( savedBitCrushLfoDepth )
-   SWAP_32( savedWetMix )
-   SWAP_32( savedDryMix )
-
-// --- AUTO-GENERATED SETSTATE SWAP END
-
-#endif
-
 // --- AUTO-GENERATED SETSTATE APPLY START
+
     fBitDepth = savedBitDepth;
     fBitCrushLfo = savedBitCrushLfo;
     fBitCrushLfoDepth = savedBitCrushLfoDepth;
@@ -333,37 +327,17 @@ tresult PLUGIN_API __PLUGIN_NAME__::getState( IBStream* state )
 {
     // here we save the model values
 
+    IBStreamer streamer( state, kLittleEndian );
+
 // --- AUTO-GENERATED GETSTATE START
-    float toSaveBitDepth = fBitDepth;
-    float toSaveBitCrushLfo = fBitCrushLfo;
-    float toSaveBitCrushLfoDepth = fBitCrushLfoDepth;
-    float toSaveWetMix = fWetMix;
-    float toSaveDryMix = fDryMix;
+
+    streamer.writeFloat( fBitDepth );
+    streamer.writeFloat( fBitCrushLfo );
+    streamer.writeFloat( fBitCrushLfoDepth );
+    streamer.writeFloat( fWetMix );
+    streamer.writeFloat( fDryMix );
 
 // --- AUTO-GENERATED GETSTATE END
-
-
-#if BYTEORDER == kBigEndian
-
-// --- AUTO-GENERATED GETSTATE SWAP START
-   SWAP_32( toSaveBitDepth )
-   SWAP_32( toSaveBitCrushLfo )
-   SWAP_32( toSaveBitCrushLfoDepth )
-   SWAP_32( toSaveWetMix )
-   SWAP_32( toSaveDryMix )
-
-// --- AUTO-GENERATED GETSTATE SWAP END
-
-#endif
-
-// --- AUTO-GENERATED GETSTATE APPLY START
-    state->write( &toSaveBitDepth, sizeof( float ));
-    state->write( &toSaveBitCrushLfo, sizeof( float ));
-    state->write( &toSaveBitCrushLfoDepth, sizeof( float ));
-    state->write( &toSaveWetMix, sizeof( float ));
-    state->write( &toSaveDryMix, sizeof( float ));
-
-// --- AUTO-GENERATED GETSTATE APPLY END
 
     return kResultOk;
 }

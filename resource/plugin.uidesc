@@ -10,10 +10,13 @@
         background-color="~ BlackCColor" background-color-draw-style="filled and stroked" bitmap="background"
         class="CViewContainer"  mouse-enabled="true"  transparent="false">
 
+
 <!-- AUTO-GENERATED CONTROLS START -->
 
+
         <!-- Resolution -->
-        <view control-tag="Unit1::bitDepthParam" class="CSlider" origin="199, 165" size="104, 21"
+        <view
+              control-tag="Unit1::bitDepthParam" class="CSlider" origin="199, 165" size="104, 21"
               max-value="1.f" min-value="0.f" default-value="1.f"
               background-offset="0, 0" bitmap="slider_background"
               bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
@@ -22,9 +25,9 @@
               mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
               transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
         />
-
         <!-- Bit crush LFO -->
-        <view control-tag="Unit1::bitCrushLfoParam" class="CSlider" origin="10, 90" size="134, 21"
+        <view
+              control-tag="Unit1::bitCrushLfoParam" class="CSlider" origin="10, 90" size="134, 21"
               max-value="10.f" min-value="0.f" default-value="0.f"
               background-offset="0, 0" bitmap="slider_background"
               bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
@@ -33,9 +36,9 @@
               mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
               transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
         />
-
         <!-- Bit crush LFO depth -->
-        <view control-tag="Unit1::bitCrushLfoDepthParam" class="CSlider" origin="10, 120" size="134, 21"
+        <view
+              control-tag="Unit1::bitCrushLfoDepthParam" class="CSlider" origin="10, 120" size="134, 21"
               max-value="1.f" min-value="0.f" default-value="0.f"
               background-offset="0, 0" bitmap="slider_background"
               bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
@@ -44,9 +47,9 @@
               mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
               transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
         />
-
         <!-- Wet mix -->
-        <view control-tag="Unit1::wetMixParam" class="CSlider" origin="10, 150" size="134, 21"
+        <view
+              control-tag="Unit1::wetMixParam" class="CSlider" origin="10, 150" size="134, 21"
               max-value="1.f" min-value="0.f" default-value="1.f"
               background-offset="0, 0" bitmap="slider_background"
               bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
@@ -55,9 +58,9 @@
               mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
               transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
         />
-
         <!-- Dry mix -->
-        <view control-tag="Unit1::dryMixParam" class="CSlider" origin="10, 180" size="134, 21"
+        <view
+              control-tag="Unit1::dryMixParam" class="CSlider" origin="10, 180" size="134, 21"
               max-value="1.f" min-value="0.f" default-value="0.f"
               background-offset="0, 0" bitmap="slider_background"
               bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
@@ -66,7 +69,6 @@
               mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
               transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
         />
-
 <!-- AUTO-GENERATED CONTROLS END -->
 
     </template>
@@ -103,8 +105,8 @@
 
     <control-tags>
         <control-tag name="UI::SendMessage" tag="1000"/>
-
 <!-- AUTO-GENERATED TAGS START -->
+
        <control-tag name="Unit1::bitDepthParam" tag="0" />
        <control-tag name="Unit1::bitCrushLfoParam" tag="1" />
        <control-tag name="Unit1::bitCrushLfoDepthParam" tag="2" />
