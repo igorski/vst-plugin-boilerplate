@@ -75,6 +75,7 @@ const SOURCE_FOLDER      = "./src";
 const RESOURCE_FOLDER    = "./resource";
 const START_OF_OUTPUT_ID = "// --- AUTO-GENERATED START";
 const END_OF_OUTPUT_ID   = "// --- AUTO-GENERATED END";
+const PARAM_ID_INDEX     = 1; // start enum id for custom param ids
 
 function replaceContent( fileData, lineContent = [], startId = START_OF_OUTPUT_ID, endId = END_OF_OUTPUT_ID ) {
     // first generate the appropriate regular expression
@@ -127,7 +128,7 @@ function generateParamIds() {
     MODEL.forEach(( entry, index ) => {
         const { descr } = entry;
         const { paramId } = generateNamesForParam( entry );
-        const line = `    ${paramId} = ${index},    // ${descr}\n`;
+        const line = `    ${paramId} = ${( index + PARAM_ID_INDEX )},    // ${descr}\n`;
         lines.push( line );
     });
     fs.writeFileSync( outputFile, replaceContent( fileData, lines ));
@@ -367,7 +368,7 @@ function generateUI() {
         <!-- ${descr} -->
         ${control}` );
 
-        tagLines.push(`       <control-tag name="Unit1::${param}" tag="${index}" />\n` );
+        tagLines.push(`        <control-tag name="Unit1::${param}" tag="${( index + PARAM_ID_INDEX )}" />\n` );
     });
 
     let startId = '<!-- AUTO-GENERATED CONTROLS START -->';

@@ -29,17 +29,17 @@ enum
     // these identifiers are mapped to the UI in plugin.uidesc
     // and consumed by controller.cpp to update the model
 
+    kBypassId = 0, // parameter used to bypass the effect processing
+
 // --- AUTO-GENERATED START
 
-    kBitDepthId = 0,    // Resolution
-    kBitCrushLfoId = 1,    // Bit crush LFO
-    kBitCrushLfoDepthId = 2,    // Bit crush LFO depth
-    kWetMixId = 3,    // Wet mix
-    kDryMixId = 4,    // Dry mix
+    kBitDepthId = 1,    // Resolution
+    kBitCrushLfoId = 2,    // Bit crush LFO
+    kBitCrushLfoDepthId = 3,    // Bit crush LFO depth
+    kWetMixId = 4,    // Wet mix
+    kDryMixId = 5,    // Dry mix
 
 // --- AUTO-GENERATED END
-
-    kVuPPMId // for the Vu value return to host
 };
 
 #endif

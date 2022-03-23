@@ -77,6 +77,10 @@ tresult PLUGIN_API PluginController::initialize( FUnknown* context )
 
     // plugin controls
 
+    parameters.addParameter(
+        STR16( "Bypass" ), nullptr, 1, 0, ParameterInfo::kCanAutomate | ParameterInfo::kIsBypass, kBypassId
+    );
+
 // --- AUTO-GENERATED START
 
     RangeParameter* bitDepthParam = new RangeParameter(
@@ -140,6 +144,11 @@ tresult PLUGIN_API PluginController::setComponentState( IBStream* state )
 
     IBStreamer streamer( state, kLittleEndian );
 
+    int32 savedBypass = 0;
+    if ( streamer.readInt32( savedBypass ) == false )
+        return kResultFalse;
+    setParamNormalized( kBypassId, savedBypass ? 1 : 0 );
+
 // --- AUTO-GENERATED SETCOMPONENTSTATE START
 
     float savedBitDepth = 1.f;
@@ -169,8 +178,6 @@ tresult PLUGIN_API PluginController::setComponentState( IBStream* state )
 
 
 // --- AUTO-GENERATED SETCOMPONENTSTATE END
-
-    state->seek( sizeof ( float ), IBStream::kIBSeekCur );
 
     return kResultOk;
 }

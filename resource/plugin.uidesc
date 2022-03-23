@@ -104,15 +104,16 @@
     <!-- map the controllers listed above to their paramids by tag index -->
 
     <control-tags>
-        <control-tag name="UI::SendMessage" tag="1000"/>
+        <control-tag name="Root::Bypass" tag="0" />
 <!-- AUTO-GENERATED TAGS START -->
 
-       <control-tag name="Unit1::bitDepthParam" tag="0" />
-       <control-tag name="Unit1::bitCrushLfoParam" tag="1" />
-       <control-tag name="Unit1::bitCrushLfoDepthParam" tag="2" />
-       <control-tag name="Unit1::wetMixParam" tag="3" />
-       <control-tag name="Unit1::dryMixParam" tag="4" />
+        <control-tag name="Unit1::bitDepthParam" tag="1" />
+        <control-tag name="Unit1::bitCrushLfoParam" tag="2" />
+        <control-tag name="Unit1::bitCrushLfoDepthParam" tag="3" />
+        <control-tag name="Unit1::wetMixParam" tag="4" />
+        <control-tag name="Unit1::dryMixParam" tag="5" />
 
 <!-- AUTO-GENERATED TAGS END -->
+        <control-tag name="UI::SendMessage" tag="1000"/>
     </control-tags>
 </vstgui-ui-description>

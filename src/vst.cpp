@@ -46,7 +46,6 @@ float VST::SAMPLE_RATE = 44100.f; // updated in setupProcessing()
 //------------------------------------------------------------------------
 __PLUGIN_NAME__::__PLUGIN_NAME__()
 : pluginProcess( nullptr )
-, outputGainOld( 0.f )
 , currentProcessMode( -1 ) // -1 means not initialized
 {
     // register its editor class (the same as used in vstentry.cpp)
@@ -96,9 +95,6 @@ tresult PLUGIN_API __PLUGIN_NAME__::setActive (TBool state)
         sendTextMessage( "__PLUGIN_NAME__::setActive (true)" );
     else
         sendTextMessage( "__PLUGIN_NAME__::setActive (false)" );
-
-    // reset output level meter
-    outputGainOld = 0.f;
 
     // call our parent setActive
     return AudioEffect::setActive( state );
@@ -157,6 +153,11 @@ tresult PLUGIN_API __PLUGIN_NAME__::process( ProcessData& data )
                         break;
 
 // --- AUTO-GENERATED PROCESS END
+
+                    case kBypassId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
+                            _bypass = ( value > 0.5f );
+                        break;
                 }
                 syncModel();
             }
@@ -200,37 +201,40 @@ tresult PLUGIN_API __PLUGIN_NAME__::process( ProcessData& data )
 
     bool isDoublePrecision = ( data.symbolicSampleSize == kSample64 );
 
-    if ( isDoublePrecision ) {
-        // 64-bit samples, e.g. Reaper64
-        pluginProcess->process<double>(
-            ( double** ) in, ( double** ) out, numInChannels, numOutChannels,
-            data.numSamples, sampleFramesSize
-        );
-    }
-    else {
-        // 32-bit samples, e.g. Ableton Live, Bitwig Studio... (oddly enough also when 64-bit?)
-        pluginProcess->process<float>(
-            ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
-            data.numSamples, sampleFramesSize
-        );
+    if ( _bypass )
+    {
+        // bypass mode, write the input unchanged into the output
+        for ( int32 i = 0, l = std::min( numInChannels, numOutChannels ); i < l; i++ )
+		{
+			if ( in[ i ] != out[ i ])
+			{
+				memcpy( out[ i ], in[ i ], sampleFramesSize );
+			}
+		}
+    } else {
+        // apply processing
+
+        if ( isDoublePrecision ) {
+            // 64-bit samples, e.g. Reaper64
+            pluginProcess->process<double>(
+                ( double** ) in, ( double** ) out, numInChannels, numOutChannels,
+                data.numSamples, sampleFramesSize
+            );
+        }
+        else {
+            // 32-bit samples, e.g. Ableton Live, Bitwig Studio... (oddly enough also when 64-bit?)
+            pluginProcess->process<float>(
+                ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
+                data.numSamples, sampleFramesSize
+            );
+        }
     }
 
     // output flags
 
     data.outputs[ 0 ].silenceFlags = false; // there should always be output
-    float outputGain = pluginProcess->limiter->getLinearGR();
+    //float outputGain = pluginProcess->limiter->getLinearGR();
 
-    //---4) Write output parameter changes-----------
-    IParameterChanges* outParamChanges = data.outputParameterChanges;
-    // a new value of VuMeter will be sent to the host
-    // (the host will send it back in sync to our controller for updating our editor)
-    if ( !isDoublePrecision && outParamChanges && outputGainOld != outputGain ) {
-        int32 index = 0;
-        IParamValueQueue* paramQueue = outParamChanges->addParameterData( kVuPPMId, index );
-        if ( paramQueue )
-            paramQueue->addPoint( 0, outputGain, index );
-    }
-    outputGainOld = outputGain;
     return kResultOk;
 }
 
@@ -251,6 +255,10 @@ tresult PLUGIN_API __PLUGIN_NAME__::setState( IBStream* state )
     // called when we load a preset, the model has to be reloaded
 
     IBStreamer streamer( state, kLittleEndian );
+
+    int32 savedBypass = 0;
+    if ( streamer.readInt32( savedBypass ) == false )
+        return kResultFalse;
 
 // --- AUTO-GENERATED SETSTATE START
 
@@ -277,6 +285,8 @@ tresult PLUGIN_API __PLUGIN_NAME__::setState( IBStream* state )
 
 // --- AUTO-GENERATED SETSTATE END
 
+    _bypass = savedBypass > 0;
+
 // --- AUTO-GENERATED SETSTATE APPLY START
 
     fBitDepth = savedBitDepth;
@@ -301,7 +311,7 @@ tresult PLUGIN_API __PLUGIN_NAME__::setState( IBStream* state )
             if ( list->getString( PresetAttributes::kStateType, string, 128 * sizeof( TChar )) == kResultTrue )
             {
                 UString128 tmp( string );
-                char ascii[128];
+                char ascii[ 128 ];
                 tmp.toAscii( ascii, 128 );
                 if ( !strncmp( ascii, StateType::kProject, strlen( StateType::kProject )))
                 {
@@ -310,7 +320,7 @@ tresult PLUGIN_API __PLUGIN_NAME__::setState( IBStream* state )
             }
 
             // get the full file path of this state
-            TChar fullPath[1024];
+            TChar fullPath[ 1024 ];
             memset( fullPath, 0, 1024 * sizeof( TChar ));
             if ( list->getString( PresetAttributes::kFilePathStringType,
                  fullPath, 1024 * sizeof( TChar )) == kResultTrue )
@@ -328,6 +338,8 @@ tresult PLUGIN_API __PLUGIN_NAME__::getState( IBStream* state )
     // here we save the model values
 
     IBStreamer streamer( state, kLittleEndian );
+
+    streamer.writeInt32( _bypass ? 1 : 0 );
 
 // --- AUTO-GENERATED GETSTATE START
 
