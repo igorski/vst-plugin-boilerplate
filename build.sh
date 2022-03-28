@@ -29,8 +29,9 @@ if [ $buildStatus -eq 0 ]; then
     if [ "$1" == "vst2" ]; then
         mv ./VST3/__PLUGIN_NAME__.vst3 ./VST3/__PLUGIN_NAME__.vst
     fi
+    echo "Plugin built successfully"
 else
-    echo "KUT!"
+    echo "An error occurred during build of plugin"
 fi
 
 exit $buildStatus
