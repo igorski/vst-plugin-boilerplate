@@ -26,7 +26,13 @@ Once your SDK is "setup" for VST2, simply uncomment the following line in _CMake
 set(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
 ```
 
-And rename the generated plugin extension from _.vst3_ to _.vst_ (or _.dll_ on Windows).
+And rename the generated plugin extension from _.vst3_ to _.vst_ (or _.dll_ on Windows). Alternatively, pass
+"_vst2_" as an argument to the _build.sh_ and _build.bat_ files without having to edit the make file or
+rename the generated VST manually. E.g.:
+
+```
+sh build.sh vst2
+```
 
 ### Compiling for both 32-bit and 64-bit architectures
 
