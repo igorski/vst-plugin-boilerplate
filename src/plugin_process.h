@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2022 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -49,6 +49,12 @@ class PluginProcess {
         void setDryMix( float value );
         void setWetMix( float value );
 
+        // synchronize the effects tempo with the host - when desired -
+        // tempo is in BPM, time signature provided as: timeSigNumerator / timeSigDenominator (e.g. 3/4)
+        // returns true when tempo has updated, false to indicate no change was made
+
+        bool setTempo( double tempo, int32 timeSigNumerator, int32 timeSigDenominator );
+
         // child processors
 
         BitCrusher* bitCrusher;
@@ -61,6 +67,17 @@ class PluginProcess {
         float _dryMix;
         float _wetMix;
         int _amountOfChannels;
+
+        // tempo related
+
+        double _tempo              = 0.0;
+        int32 _timeSigNumerator    = 0;
+        int32 _timeSigDenominator  = 0;
+        float _fullMeasureDuration = 0.f;
+        int _fullMeasureSamples    = 0;
+        int _halfMeasureSamples    = 0;
+        int _beatSamples           = 0;
+        int _sixteenthSamples      = 0;
 
         // ensures the pre- and post mix buffers match the appropriate amount of channels
         // and buffer size. this also clones the contents of given in buffer into the pre-mix buffer

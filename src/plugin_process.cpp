@@ -22,6 +22,7 @@
  */
 #include "plugin_process.h"
 #include <math.h>
+#include "calc.h"
 
 namespace Igorski {
 
@@ -56,6 +57,25 @@ void PluginProcess::setDryMix( float value ) {
 
 void PluginProcess::setWetMix( float value ) {
     _wetMix = value;
+}
+
+bool PluginProcess::setTempo( double tempo, int32 timeSigNumerator, int32 timeSigDenominator )
+{
+    if ( _tempo == tempo && _timeSigNumerator == timeSigNumerator && _timeSigDenominator == timeSigDenominator ) {
+        return false; // no change
+    }
+
+    _timeSigNumerator   = timeSigNumerator;
+    _timeSigDenominator = timeSigDenominator;
+    _tempo              = tempo;
+
+    _fullMeasureDuration = ( 60.f / _tempo ) * _timeSigDenominator; // seconds per measure
+    _fullMeasureSamples  = Calc::secondsToBuffer( _fullMeasureDuration ); // samples per measure
+    _beatSamples         = ceil( _fullMeasureSamples / _timeSigDenominator ); // samples per beat
+    _halfMeasureSamples  = ceil( _fullMeasureSamples / 2 ); // samples per half measure
+    _sixteenthSamples    = ceil( _fullMeasureSamples / 16 ); // samples per 16th note
+
+    return true;
 }
 
 }
