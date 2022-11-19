@@ -145,7 +145,7 @@ function generateVstHeader() {
         const type = getType( entry );
         let line;
         if ( type === "bool" ) {
-            line = `        bool ${model} = ${!!parseFloat( value.def > 0.5 )};    // ${descr}`;
+            line = `        bool ${model} = ${!!parseFloat( value.def ) > 0.5};    // ${descr}`;
         } else {
             line = `        float ${model} = ${value.def ?? value.min};    // ${descr}`;
         }
