@@ -173,6 +173,7 @@ tresult PLUGIN_API __PLUGIN_NAME__::process( ProcessData& data )
             data.processContext->tempo, data.processContext->timeSigNumerator, data.processContext->timeSigDenominator
         );
         */
+        // also run synchronization on properties that are tempo dependant here...
     }
 
     //---2) Read input events-------------

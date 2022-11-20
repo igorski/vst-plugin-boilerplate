@@ -73,11 +73,11 @@ class PluginProcess {
         double _tempo              = 0.0;
         int32 _timeSigNumerator    = 0;
         int32 _timeSigDenominator  = 0;
-        float _fullMeasureDuration = 0.f;
-        int _fullMeasureSamples    = 0;
-        int _halfMeasureSamples    = 0;
-        int _beatSamples           = 0;
-        int _sixteenthSamples      = 0;
+        float _fullMeasureDuration = 1.f;
+        int _fullMeasureSamples    = 1;
+        int _halfMeasureSamples    = 1;
+        int _beatSamples           = 1;
+        int _sixteenthSamples      = 1;
 
         // ensures the pre- and post mix buffers match the appropriate amount of channels
         // and buffer size. this also clones the contents of given in buffer into the pre-mix buffer
