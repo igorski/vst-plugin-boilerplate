@@ -17,7 +17,7 @@ __PLUGIN_NAME__ is a VST/AU plug-in which provides... [description goes here]
 VST3 is great and all, but support across DAW's is poor (looking at a certain popular German product). You can however build as a VST2.4 plugin and enjoy it on a wider range of host platforms.
 
 However: as of SDK 3.6.11, Steinberg no longer packages the required _./pluginterfaces/vst2.x_-folder inside the VST3_SDK folder.
-If you wish to build a VST2 plugin, copying the folder from an older SDK version _could_ work (verified 3.6.9. _vst2.x_ folders to work with SDK 3.7.0), though be aware
+If you wish to build a VST2 plugin, copying the folder from an older SDK version _could_ work (verified 3.6.9. _vst2.x_ folders to work with SDK 3.7.6), though be aware
 that you _need a license to target VST2_. You can view [Steinbergs rationale on this decision here](https://www.steinberg.net/en/newsandevents/news/newsdetail/article/vst-2-coming-to-an-end-4727.html).
 
 Once your SDK is "setup" for VST2, simply uncomment the following line in _CMakeLists.txt_:
@@ -36,16 +36,16 @@ sh build.sh vst2
 
 ### Compiling for both 32-bit and 64-bit architectures
 
-Depending on your host software having 32-bit or 64-bit support, you can best compile for a wider range of architectures. To do so,
+Depending on your host software having 32-bit or 64-bit support (either Intel or M1), you can best compile for a wider range of architectures. To do so,
 replace all invocations of _cmake_ in this README with the following:
 
 **macOS:**
 
 ```
-cmake -"DCMAKE_OSX_ARCHITECTURES=x86_64;i1386" ..
+cmake -"DCMAKE_OSX_ARCHITECTURES=x86_64;arm64;i1386" ..
 ```
 
-Which will allow you to compile a single, "fat" binary that supports all architectures.
+Which will allow you to compile a single, "fat" binary that supports all architectures (Intel, M1 and legacy 32-bit Intel).
 
 **Windows:**
 
@@ -71,7 +71,7 @@ The project uses [CMake](https://cmake.org) to generate the Makefiles and has be
 
 ### Environment setup
 
-Apart from requiring _CMake_ and a C(++) compiler such as _Clang_ or _MSVC_, the only other dependency is the [VST SDK from Steinberg](https://www.steinberg.net/en/company/developers.html) (the projects latest update requires SDK version 3.7.0).
+Apart from requiring _CMake_ and a C(++) compiler such as _Clang_ or _MSVC_, the only other dependency is the [VST SDK from Steinberg](https://www.steinberg.net/en/company/developers.html) (the projects latest update requires SDK version 3.7.6).
 
 Be aware that prior to building the plugin, the Steinberg SDK needs to be built from source as well. Following Steinbergs guidelines, the build target should be a _/build_-subfolder of the _/VST3_SDK_-folder.
 To generate a release build of the library, execute the following commands from the root of the Steinberg SDK folder:
