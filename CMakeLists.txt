@@ -318,7 +318,8 @@ smtg_target_add_plugin_resources(${target}
 
 if(APPLE)
     smtg_target_set_bundle(${target} INFOPLIST "${CMAKE_CURRENT_SOURCE_DIR}/mac/Info.plist" PREPROCESS)
-    smtg_target_add_plugin_resource(${target} "${CMAKE_CURRENT_SOURCE_DIR}/mac/PkgInfo" "../") # adding PkgInfo at root level makes plugin appear as a file instead of folder
+    # adding PkgInfo at root level makes plugin appear as a file instead of folder
+    smtg_target_add_plugin_resources(${target} RESOURCES "${CMAKE_CURRENT_SOURCE_DIR}/mac/PkgInfo" OUTPUT_SUBDIRECTORY "../")
 elseif(WIN)
     target_sources(${target} PRIVATE resource/plugin.rc)
 endif()
