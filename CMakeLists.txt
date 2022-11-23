@@ -312,10 +312,9 @@ endif()
 
 ## Add the resource files to the bundle
 
-smtg_target_add_plugin_resources(${target} ${vst_ui_descr})
-foreach(resource IN ITEMS ${vst_resources})
-    smtg_target_add_plugin_resources(${target} ${resource})
-endforeach()
+smtg_target_add_plugin_resources(${target}
+    RESOURCES ${vst_ui_descr} ${vst_resources}
+)
 
 if(APPLE)
     smtg_target_set_bundle(${target} INFOPLIST "${CMAKE_CURRENT_SOURCE_DIR}/mac/Info.plist" PREPROCESS)
