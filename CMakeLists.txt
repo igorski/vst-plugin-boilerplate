@@ -98,6 +98,17 @@ set(vst2_sources
     ${VST3_SDK_ROOT}/public.sdk/source/vst/vst2wrapper/vst2wrapper.sdk.cpp
     src/vstentry_vst2.cpp
 )
+if(APPLE)
+    set(vst2_sources
+        ${vst2_sources}
+        ${VST3_SDK_ROOT}/public.sdk/source/common/threadchecker_mac.mm
+    )
+elseif(WIN)
+    set(vst2_sources
+        ${vst2_sources}
+        ${VST3_SDK_ROOT}/public.sdk/source/common/threadchecker_win32.cpp
+    )
+endif()
 
 ##########################
 # Plugin project sources #
