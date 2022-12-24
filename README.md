@@ -142,10 +142,19 @@ When debugging, you can also choose to run the plugin against Steinbergs validat
 
 ### Build as Audio Unit (macOS only)
 
-Is aided by the excellent [Jamba framework](https://github.com/pongasoft/jamba) by Pongasoft, which provides a toolchain around Steinbergs SDK. Execute the following instructions to build the plugin as an Audio Unit:
+For this you will need a little extra preparation while building Steinberg SDK. Additionally, you will need the
+CoreAudio SDK and XCode. Execute the following instructions to build the SDK with Audio Unit support, replace `SMTG_COREAUDIO_SDK_PATH` with the actual installation location of the CoreAudio SDK:
 
-* Build the AUWrapper Project in the Steinberg SDK folder
-* Create a Release build of the Xcode project generated in step 1, this creates _vst3sdk/public.sdk/source/vst/auwrapper/build/lib/Release/libauwrapper.a_
+```
+cd vst3sdk
+mkdir build
+cd build
+cmake -GXcode -DCMAKE_BUILD_TYPE=Release -DSMTG_COREAUDIO_SDK_PATH=/Library/CoreAudioSDK/CoreAudio ..
+cmake --build . --config Release
+```
+
+Execute the following instructions to build the plugin as an Audio Unit:
+
 * Run _sh build_au.sh_ from the repository root, providing the path to _VST3_SDK_ROOT_ as before:
 
 ```
@@ -155,4 +164,8 @@ VST3_SDK_ROOT=/path/to/VST_SDK/vst3sdk sh build_au.sh
 The subsequent Audio Unit component will be located in _./build/VST3/__PLUGIN_NAME__.component_ as well as linked
 in _~/Library/Audio/Plug-Ins/Components/_
 
-You can validate the Audio Unit using Apple's _auval_ utility, by running _auval -v aufx dely IGOR_ on the command line. Note that there is the curious behaviour that you might need to reboot before the plugin shows up, though you can force a flush of the Audio Unit cache at runtime by running _killall -9 AudioComponentRegistrar_.
+You can validate the Audio Unit using Apple's _auval_ utility, by running _auval -v aufx dist IGOR_ on the command line. Note that there is the curious behaviour that you might need to reboot before the plugin shows up, though you can force a flush of the Audio Unit cache at runtime by running _killall -9 AudioComponentRegistrar_.
+
+NOTE: Updates of the Steinberg SDK have been known to break Audio Unit support. You can always try building
+the plugin as part of the SDK examples (see CMakeLists.txt in audio-unit folder) when building the VST3_SDK as
+that _might_ work.
