@@ -164,7 +164,8 @@ VST3_SDK_ROOT=/path/to/VST_SDK/vst3sdk sh build_au.sh
 The subsequent Audio Unit component will be located in _./build/VST3/__PLUGIN_NAME__.component_ as well as linked
 in _~/Library/Audio/Plug-Ins/Components/_
 
-You can validate the Audio Unit using Apple's _auval_ utility, by running _auval -v aufx dist IGOR_ on the command line. Note that there is the curious behaviour that you might need to reboot before the plugin shows up, though you can force a flush of the Audio Unit cache at runtime by running _killall -9 AudioComponentRegistrar_.
+You can validate the Audio Unit using Apple's _auval_ utility, by running _auval -v aufx dist IGOR_ on the command line. Note that there is the curious behaviour that you might need to reboot before the plugin shows up, though you can force a flush of the Audio Unit cache at runtime by running _killall -9 AudioComponentRegistrar_. If you
+experience errors testing your plugin, you can look up the [error code](https://www.osstatus.com/).
 
 NOTE: Updates of the Steinberg SDK have been known to break Audio Unit support. You can always try building
 the plugin as part of the SDK examples (see CMakeLists.txt in audio-unit folder) when building the VST3_SDK as
