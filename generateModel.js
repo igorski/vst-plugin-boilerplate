@@ -171,8 +171,7 @@ function generateVstImpl() {
             // 1. __PLUGIN_NAME__::process
             processLines.push(`
                     case ${paramId}:
-                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
-                            ${model} = ( value > 0.5f );
+                        ${model} = ( value > 0.5f );
                         break;\n`);
 
             // 2. __PLUGIN_NAME__::setState
@@ -192,8 +191,7 @@ function generateVstImpl() {
             // 1. __PLUGIN_NAME__::process
             processLines.push(`
                     case ${paramId}:
-                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
-                            ${model} = ( float ) value;
+                        ${model} = ( float ) value;
                         break;\n`);
 
             // 2. __PLUGIN_NAME__::setState

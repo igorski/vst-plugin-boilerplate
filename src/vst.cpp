@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2023 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -122,34 +122,34 @@ tresult PLUGIN_API __PLUGIN_NAME__::process( ProcessData& data )
                 ParamValue value;
                 int32 sampleOffset;
                 int32 numPoints = paramQueue->getPointCount();
+
+                if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) != kResultTrue ) {
+                    continue;
+                }
+
                 switch ( paramQueue->getParameterId())
                 {
 // --- AUTO-GENERATED PROCESS START
 
 
                     case kBitDepthId:
-                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
-                            fBitDepth = ( float ) value;
+                        fBitDepth = ( float ) value;
                         break;
 
                     case kBitCrushLfoId:
-                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
-                            fBitCrushLfo = ( float ) value;
+                        fBitCrushLfo = ( float ) value;
                         break;
 
                     case kBitCrushLfoDepthId:
-                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
-                            fBitCrushLfoDepth = ( float ) value;
+                        fBitCrushLfoDepth = ( float ) value;
                         break;
 
                     case kWetMixId:
-                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
-                            fWetMix = ( float ) value;
+                        fWetMix = ( float ) value;
                         break;
 
                     case kDryMixId:
-                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value ) == kResultTrue )
-                            fDryMix = ( float ) value;
+                        fDryMix = ( float ) value;
                         break;
 
 // --- AUTO-GENERATED PROCESS END
