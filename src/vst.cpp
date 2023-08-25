@@ -200,20 +200,23 @@ tresult PLUGIN_API __PLUGIN_NAME__::process( ProcessData& data )
 
     // process the incoming sound!
 
-    bool isDoublePrecision = ( data.symbolicSampleSize == kSample64 );
+    bool isSilentInput  = data.inputs[ 0 ].silenceFlags != 0;
+    bool isSilentOutput = false;
 
     if ( _bypass )
     {
         // bypass mode, write the input unchanged into the output
         for ( int32 i = 0, l = std::min( numInChannels, numOutChannels ); i < l; i++ )
-		{
-			if ( in[ i ] != out[ i ])
-			{
-				memcpy( out[ i ], in[ i ], sampleFramesSize );
-			}
-		}
-    } else {
+        {
+            if ( in[ i ] != out[ i ] ) {
+                memcpy( out[ i ], in[ i ], sampleFramesSize );
+            }
+            isSilentOutput = isSilentInput;
+        }
+    }
+    else {
         // apply processing
+        bool isDoublePrecision = data.symbolicSampleSize == kSample64;
 
         if ( isDoublePrecision ) {
             // 64-bit samples, e.g. Reaper64
@@ -229,12 +232,14 @@ tresult PLUGIN_API __PLUGIN_NAME__::process( ProcessData& data )
                 data.numSamples, sampleFramesSize
             );
         }
+        // update isSilentOutput accordingly
     }
 
     // output flags
 
-    data.outputs[ 0 ].silenceFlags = false; // there should always be output
-    //float outputGain = pluginProcess->limiter->getLinearGR();
+    data.outputs[ 0 ].silenceFlags = isSilentOutput ? (( uint64 ) 1 << numOutChannels ) - 1 : 0;
+
+    // float outputGain = pluginProcess->limiter->getLinearGR();
 
     return kResultOk;
 }
