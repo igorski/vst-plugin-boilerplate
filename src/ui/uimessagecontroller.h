@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2024 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -25,6 +25,7 @@
 
 #include "vstgui/lib/iviewlistener.h"
 #include "vstgui/uidescription/icontroller.h"
+#include "public.sdk/source/vst/utility/stringconvert.h"
 
 //------------------------------------------------------------------------
 namespace Steinberg {
@@ -54,12 +55,10 @@ class PluginUIMessageController : public VSTGUI::IController, public VSTGUI::Vie
 
         void setMessageText( String128 msgText )
         {
-            if ( !textEdit )
+            if ( !textEdit ) {
                 return;
-
-            String str( msgText );
-            str.toMultiByte( kCP_Utf8 );
-            textEdit->setText( str.text8() );
+            }
+            textEdit->setText( VST3::StringConvert::convert( msgText ));
         }
 
     private:
@@ -99,24 +98,22 @@ class PluginUIMessageController : public VSTGUI::IController, public VSTGUI::Vie
         }
         //--- from IControlListener ----------------------
         //--- is called when a view is created -----
-        CView* verifyView ( CView* view, const UIAttributes& /*attributes*/,
-                            const IUIDescription* /*description*/ ) override
+        CView* verifyView( CView* view, const UIAttributes& /*attributes*/,
+                           const IUIDescription* /*description*/ ) override
         {
-            if ( CTextEdit* te = dynamic_cast<CTextEdit*>( view ))
-            {
+            if ( CTextEdit* te = dynamic_cast<CTextEdit*>( view )) {
                 // this allows us to keep a pointer of the text edit view
                 textEdit = te;
 
                 // add this as listener in order to get viewWillDelete and viewLostFocus calls
-                textEdit->registerViewListener (this);
+                textEdit->registerViewListener( this );
 
                 // initialize it content
-                String str( pluginController->getDefaultMessageText());
-                str.toMultiByte (kCP_Utf8);
-                textEdit->setText (str.text8 ());
+                textEdit->setText( VST3::StringConvert::convert( pluginController->getDefaultMessageText() ));
             }
             return view;
         }
+
         //--- from IViewListenerAdapter ----------------------
         //--- is called when a view will be deleted: the editor is closed -----
         void viewWillDelete (CView* view) override
@@ -128,17 +125,13 @@ class PluginUIMessageController : public VSTGUI::IController, public VSTGUI::Vie
             }
         }
         //--- is called when the view is unfocused -----------------
-        void viewLostFocus (CView* view) override
+        void viewLostFocus( CView* view ) override
         {
-            if (dynamic_cast<CTextEdit*> (view) == textEdit)
-            {
+            if ( dynamic_cast<CTextEdit*>( view ) == textEdit ) {
                 // save the last content of the text edit view
-                const UTF8String& text = textEdit->getText ();
-                String128 messageText;
-                String str;
-                str.fromUTF8 (text.data ());
-                str.copyTo (messageText, 128);
-                pluginController->setDefaultMessageText (messageText);
+                const auto& text = textEdit->getText();
+                auto utf16Text = VST3::StringConvert::convert( text.getString());
+                pluginController->setDefaultMessageText( utf16Text.data());
             }
         }
         ControllerType* pluginController;
