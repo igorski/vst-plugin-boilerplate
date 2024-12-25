@@ -11,10 +11,10 @@ set(CMAKE_COLOR_MAKEFILE ON)
 project(__PLUGIN_NAME__)
 set(PROJECT_VERSION 1)
 set(target __PLUGIN_NAME__)
-set(copyright "igorski.nl 2024")
+set(copyright "igorski.nl 2020-2024")
 set(major_version 1)
 set(minor_version 0)
-set(release_number 0)
+set(release_number 1)
 set(build_number 1) # TODO supply through CLI (build number is not included in public facing version strings)
 set(version_string "${major_version}.${minor_version}.${release_number}") # also see audiounitconfig.h#kAUcomponentVersion and related Info.plist
 set(SMTG_CREATE_MODULE_INFO false)
@@ -101,15 +101,15 @@ set(vst2_sources
     src/vstentry_vst2.cpp
 )
 if(APPLE)
-     set(vst2_sources
-         ${vst2_sources}
-         ${VST3_SDK_ROOT}/public.sdk/source/common/threadchecker_mac.mm
-     )
+    set(vst2_sources
+        ${vst2_sources}
+        ${VST3_SDK_ROOT}/public.sdk/source/common/threadchecker_mac.mm
+    )
  elseif(WIN)
-     set(vst2_sources
-         ${vst2_sources}
-         ${VST3_SDK_ROOT}/public.sdk/source/common/threadchecker_win32.cpp
-     )
+    set(vst2_sources
+        ${vst2_sources}
+        ${VST3_SDK_ROOT}/public.sdk/source/common/threadchecker_win32.cpp
+    )
  endif()
 
 ##########################
