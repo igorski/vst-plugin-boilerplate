@@ -19,7 +19,7 @@
 
 // The full name of the audio unit.
 // This is derived from the manufacturer and description key values
-#define kAUcomponentName __PLUGIN_NAME__
+#define kAUcomponentName Igorski: __PLUGIN_NAME__
 
 // Displayed Tags
 #define kAUcomponentTag Effects
