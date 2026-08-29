@@ -29,9 +29,10 @@ namespace Igorski {
 class BitCrusher {
 
     public:
-        BitCrusher( float amount, float inputMix, float outputMix );
+        BitCrusher( float amount = 8.f, float inputMix = 0.5f, float outputMix = 0.5f );
         ~BitCrusher();
 
+        void setSampleRate( float value );
         void setLFO( float LFORatePercentage, float LFODepth );
         void process( float* inBuffer, int bufferSize );
 
@@ -39,7 +40,7 @@ class BitCrusher {
         void setInputMix( float value );
         void setOutputMix( float value );
 
-        LFO* lfo;
+        LFO lfo;
         bool hasLFO;
 
     private:

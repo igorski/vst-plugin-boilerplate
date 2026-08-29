@@ -35,8 +35,8 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
     bool mixDry = _dryMix != 0.f;
 
-    SampleType dryMix = ( SampleType ) _dryMix;
-    SampleType wetMix = ( SampleType ) _wetMix;
+    SampleType dryMix = static_cast<SampleType>( _dryMix );
+    SampleType wetMix = static_cast<SampleType>( _wetMix );
 
     prepareMixBuffers( inBuffer, numInChannels, bufferSize );
 
@@ -48,14 +48,14 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
         float* channelPostMixBuffer  = _postMixBuffer->getBufferForChannel( c );
 
         // example processing: apply some bit crushing onto the premix buffer
-        bitCrusher->process( channelPreMixBuffer, bufferSize );
+        bitCrusher.process( channelPreMixBuffer, bufferSize );
 
         // POST MIX processing
         // apply the post mix effect processing
 
         // this is just cloning the pre mix buffer so we can hear output in this example
         for ( i = 0; i < bufferSize; ++i ) {
-            channelPostMixBuffer[ i ] = ( float ) channelPreMixBuffer[ i ];
+            channelPostMixBuffer[ i ] = static_cast<float>( channelPreMixBuffer[ i ] );
         }
 
         // mix the input and processed post mix buffers into the output buffer
@@ -67,7 +67,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             inSample = channelInBuffer[ i ];
 
             // wet mix (e.g. the effected signal)
-            channelOutBuffer[ i ] = ( SampleType ) channelPostMixBuffer[ i ] * wetMix;
+            channelOutBuffer[ i ] = static_cast<SampleType>( channelPostMixBuffer[ i ] ) * wetMix;
 
             // dry mix (e.g. mix in the input signal)
             if ( mixDry ) {
@@ -77,7 +77,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
     }
 
     // limit the output signal in case its gets hot
-    //limiter->process<SampleType>( outBuffer, bufferSize, numOutChannels );
+    // limiter.process<SampleType>( outBuffer, bufferSize, numOutChannels );
 }
 
 template <typename SampleType>
@@ -96,11 +96,11 @@ void PluginProcess::prepareMixBuffers( SampleType** inBuffer, int numInChannels,
     // used for internal processing (see PluginProcess::process)
 
     for ( int c = 0; c < numInChannels; ++c ) {
-        SampleType* inChannelBuffer = ( SampleType* ) inBuffer[ c ];
+        SampleType* inChannelBuffer = inBuffer[ c ];
         float* outChannelBuffer     =  _preMixBuffer->getBufferForChannel( c );
 
         for ( int i = 0; i < bufferSize; ++i ) {
-            outChannelBuffer[ i ] = ( float ) inChannelBuffer[ i ];
+            outChannelBuffer[ i ] = static_cast<float>( inChannelBuffer[ i ] );
         }
     }
 

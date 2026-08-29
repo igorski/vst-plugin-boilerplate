@@ -38,18 +38,18 @@ namespace Calc {
      * convert given value in seconds to the appropriate
      * value in samples (for the current sampling rate)
      */
-    inline int secondsToBuffer( float seconds )
+    inline int secondsToBuffer( float seconds, float sampleRate )
     {
-        return ( int )( seconds * Igorski::VST::SAMPLE_RATE );
+        return static_cast<int>( seconds * sampleRate );
     }
 
     /**
      * convert given value in milliseconds to the appropriate
      * value in samples (for the current sampling rate)
      */
-    inline int millisecondsToBuffer( float milliseconds )
+    inline int millisecondsToBuffer( float milliseconds, float sampleRate )
     {
-        return secondsToBuffer( milliseconds / 1000.f );
+        return secondsToBuffer( milliseconds / 1000.f, sampleRate );
     }
 
     // convenience method to ensure given value is within the 0.f - +1.f range
@@ -93,7 +93,7 @@ namespace Calc {
     inline float scale( float value, float maxValue, float maxCompareValue )
     {
         float ratio = maxCompareValue / maxValue;
-        return ( float ) ( std::min( maxValue, value ) * ratio );
+        return std::min( maxValue, value ) * ratio;
     }
 
     // cast a floating point value to a boolean true/false

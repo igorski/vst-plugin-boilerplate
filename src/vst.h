@@ -37,7 +37,7 @@ namespace Igorski {
 class __PLUGIN_NAME__ : public AudioEffect
 {
     public:
-        __PLUGIN_NAME__ ();
+        __PLUGIN_NAME__();
         virtual ~__PLUGIN_NAME__(); // do not forget virtual here
 
         //--- ---------------------------------------------------------------------

@@ -39,8 +39,6 @@
 
 namespace Igorski {
 
-float VST::SAMPLE_RATE = 44100.f; // updated in setupProcessing()
-
 //------------------------------------------------------------------------
 // Plugin Implementation
 //------------------------------------------------------------------------
@@ -52,7 +50,7 @@ __PLUGIN_NAME__::__PLUGIN_NAME__()
     setControllerClass( VST::PluginControllerUID );
 
     // should be created on setupProcessing, this however doesn't fire for Audio Unit using auval?
-    pluginProcess = new PluginProcess( 2 );
+    pluginProcess = new PluginProcess( 2, VST::DEFAULT_SAMPLE_RATE, VST::DEFAULT_BUFFER_SIZE );
 }
 
 //------------------------------------------------------------------------
@@ -89,12 +87,24 @@ tresult PLUGIN_API __PLUGIN_NAME__::terminate()
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API __PLUGIN_NAME__::setActive (TBool state)
+tresult PLUGIN_API __PLUGIN_NAME__::setActive( TBool state )
 {
-    if (state)
+    if ( state ) {
+        /* // mechanism to forward messages to controller when needed
+        Steinberg::Vst::IMessage* msg = allocateMessage();
+        if ( msg ) {
+            msg->setMessageID( "setSampleRate" );
+            msg->getAttributes()->setFloat( "sampleRate", processSetup.sampleRate );
+            sendMessage( msg );
+            msg->release();
+        }
+        */
         sendTextMessage( "__PLUGIN_NAME__::setActive (true)" );
-    else
+    } else {
         sendTextMessage( "__PLUGIN_NAME__::setActive (false)" );
+    }
+    // reset output level meter
+    // outputGainOld = 0.f;
 
     // call our parent setActive
     return AudioEffect::setActive( state );
@@ -133,23 +143,23 @@ tresult PLUGIN_API __PLUGIN_NAME__::process( ProcessData& data )
 
 
                     case kBitDepthId:
-                        fBitDepth = ( float ) value;
+                        fBitDepth = static_cast<float>( value );
                         break;
 
                     case kBitCrushLfoId:
-                        fBitCrushLfo = ( float ) value;
+                        fBitCrushLfo = static_cast<float>( value );
                         break;
 
                     case kBitCrushLfoDepthId:
-                        fBitCrushLfoDepth = ( float ) value;
+                        fBitCrushLfoDepth = static_cast<float>( value );
                         break;
 
                     case kWetMixId:
-                        fWetMix = ( float ) value;
+                        fWetMix = static_cast<float>( value );
                         break;
 
                     case kDryMixId:
-                        fDryMix = ( float ) value;
+                        fDryMix = static_cast<float>( value );
                         break;
 
 // --- AUTO-GENERATED PROCESS END
@@ -240,6 +250,18 @@ tresult PLUGIN_API __PLUGIN_NAME__::process( ProcessData& data )
     data.outputs[ 0 ].silenceFlags = isSilentOutput ? (( uint64 ) 1 << numOutChannels ) - 1 : 0;
 
     // float outputGain = pluginProcess->limiter->getLinearGR();
+
+    //---4) Write output parameter changes-----------
+    // IParameterChanges* outParamChanges = data.outputParameterChanges;
+    // // a new value of VuMeter will be sent to the host
+    // // (the host will send it back in sync to our controller for updating our editor)
+    // if ( !isDoublePrecision && outParamChanges && outputGainOld != outputGain ) {
+    //     int32 index = 0;
+    //     IParamValueQueue* paramQueue = outParamChanges->addParameterData( kVuPPMId, index );
+    //     if ( paramQueue )
+    //         paramQueue->addPoint( 0, outputGain, index );
+    // }
+    // outputGainOld = outputGain;
 
     return kResultOk;
 }
@@ -368,16 +390,7 @@ tresult PLUGIN_API __PLUGIN_NAME__::setupProcessing( ProcessSetup& newSetup )
     // here we keep a trace of the processing mode (offline,...) for example.
     currentProcessMode = newSetup.processMode;
 
-    VST::SAMPLE_RATE = newSetup.sampleRate;
-
-    // spotted to fire multiple times...
-
-    if ( pluginProcess != nullptr )
-        delete pluginProcess;
-
-    // TODO: creating a bunch of extra channels for no apparent reason?
-    // get the correct channel amount and don't allocate more than necessary...
-    pluginProcess = new PluginProcess( 6 );
+    pluginProcess->setHostProperties( newSetup.sampleRate, newSetup.maxSamplesPerBlock );
 
     syncModel();
 
@@ -466,7 +479,7 @@ tresult PLUGIN_API __PLUGIN_NAME__::notify( IMessage* message )
         {
             // we are in UI thread
             // size should be 100
-            if ( size == 100 && ((char*)data)[1] == 1 ) // yeah...
+            if ( size == 100 && (( char* ) data )[1] == 1 ) // yeah...
             {
                 fprintf( stderr, "[__PLUGIN_NAME__] received the binary message!\n" );
             }
@@ -481,8 +494,8 @@ void __PLUGIN_NAME__::syncModel()
 {
     // forward the protected model values onto the plugin process and related processors
     // NOTE: when dealing with "bool"-types, use Calc::toBool() to determine on/off
-    pluginProcess->bitCrusher->setAmount( fBitDepth );
-    pluginProcess->bitCrusher->setLFO( fBitCrushLfo, fBitCrushLfoDepth );
+    pluginProcess->bitCrusher.setAmount( fBitDepth );
+    pluginProcess->bitCrusher.setLFO( fBitCrushLfo, fBitCrushLfoDepth );
     // output mix
     pluginProcess->setDryMix( fDryMix );
     pluginProcess->setWetMix( fWetMix );

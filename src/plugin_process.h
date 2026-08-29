@@ -34,7 +34,7 @@ namespace Igorski {
 class PluginProcess {
 
     public:
-        PluginProcess( int amountOfChannels );
+        PluginProcess( int amountOfChannels, float sampleRate, int maxBufferSize );
         ~PluginProcess();
 
         // apply effect to incoming sampleBuffer contents
@@ -45,6 +45,8 @@ class PluginProcess {
         );
 
         // setters
+
+        void setHostProperties( float sampleRate, int maxBufferSize );
 
         void setDryMix( float value );
         void setWetMix( float value );
@@ -57,13 +59,14 @@ class PluginProcess {
 
         // child processors
 
-        BitCrusher* bitCrusher;
-        Limiter* limiter;
+        BitCrusher bitCrusher;
+        Limiter limiter;
 
     private:
         AudioBuffer* _preMixBuffer;  // buffer used for the pre effect mixing
         AudioBuffer* _postMixBuffer; // buffer used for the post effect mixing
 
+        float _hostSampleRate;
         float _dryMix;
         float _wetMix;
         int _amountOfChannels;
