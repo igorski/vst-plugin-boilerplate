@@ -34,7 +34,7 @@ const MODEL = [
         value: { min: "0.f", max: "1.f", def: "1.f", type: "percent" },
         ui: { x: 199, y: 165, w: 104, h: 21 },
         // note we treat full resolution as 16-bits (but is in fact whatever host is)
-        customDescr: `sprintf( text, "%.d Bits", ( int ) ( 15 * valueNormalized ) + 1 );`
+        customDescr: `snprintf( text, sizeof( text ), "%.d Bits", ( int ) ( 15 * valueNormalized ) + 1 );`
     },
     {
         name: "bitCrushLfo",
@@ -288,16 +288,16 @@ function generateController() {
             ${customDescr}`;
         } else if ( type === "bool" ) {
             line += `
-            sprintf( text, "%s", ( valueNormalized == 0 ) ? "Off" : "On" );`;
+            snprintf( text, sizeof( text ), "%s", ( valueNormalized == 0 ) ? "Off" : "On" );`;
         } else if ( type === "percent" ) {
             line += `
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));`;
+            snprintf( text, sizeof( text ), "%.2d %%", ( int ) ( valueNormalized * 100.f ));`;
         } else if ( normalizedDescr ) {
             line += `
-            sprintf( text, "%.2f ${unitDescr}", normalizedParamToPlain( tag, valueNormalized ));`;
+            snprintf( text, sizeof( text ), "%.2f ${unitDescr}", normalizedParamToPlain( tag, valueNormalized ));`;
         } else {
             line += `
-            sprintf( text, "%.2f", ( float ) valueNormalized );`;
+            snprintf( text, sizeof( text ), "%.2f", ( float ) valueNormalized );`;
         }
 
         line += `
