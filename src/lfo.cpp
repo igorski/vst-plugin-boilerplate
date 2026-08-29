@@ -25,6 +25,7 @@
 namespace Igorski {
 
 LFO::LFO() {
+    setSampleRate( VST::DEFAULT_SAMPLE_RATE );
     _rate        = VST::MIN_LFO_RATE();
     _accumulator = 0.f;
 }
@@ -34,6 +35,11 @@ LFO::~LFO() {
 }
 
 /* public methods */
+
+void LFO::setSampleRate( float value )
+{
+    _sampleRate = value;
+}
 
 float LFO::getRate()
 {

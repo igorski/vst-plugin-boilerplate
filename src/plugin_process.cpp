@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2026 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -26,30 +26,36 @@
 
 namespace Igorski {
 
-PluginProcess::PluginProcess( int amountOfChannels ) {
+PluginProcess::PluginProcess( int amountOfChannels, float sampleRate, int maxBufferSize ) {
     _amountOfChannels = amountOfChannels;
 
-    setDryMix( .5f );
-    setWetMix( .5f );
+    setHostProperties( sampleRate, maxBufferSize );
 
-    // create the child processors
+    setDryMix( 0.5f );
+    setWetMix( 0.5f );
 
-    bitCrusher = new BitCrusher( 8, .5f, .5f );
-    limiter    = new Limiter( 10.f, 500.f, .6f );
-
-    // will be lazily created in the process function
+    // these will be lazily allocated within the process function
     _preMixBuffer  = nullptr;
     _postMixBuffer = nullptr;
 }
 
 PluginProcess::~PluginProcess() {
-    delete bitCrusher;
-    delete limiter;
     delete _postMixBuffer;
     delete _preMixBuffer;
 }
 
 /* setters */
+
+void PluginProcess::setHostProperties( float sampleRate, int maxBufferSize )
+{
+    bool hadSampleRateChange = _hostSampleRate != sampleRate;
+
+    _hostSampleRate = sampleRate;
+
+    if ( hadSampleRateChange ) {
+        bitCrusher.setSampleRate( sampleRate );
+    }
+ }
 
 void PluginProcess::setDryMix( float value ) {
     _dryMix = value;
@@ -70,7 +76,7 @@ bool PluginProcess::setTempo( double tempo, int32 timeSigNumerator, int32 timeSi
     _tempo              = tempo;
 
     _fullMeasureDuration = ( 60.f / _tempo ) * _timeSigDenominator; // seconds per measure
-    _fullMeasureSamples  = Calc::secondsToBuffer( _fullMeasureDuration ); // samples per measure
+    _fullMeasureSamples  = Calc::secondsToBuffer( _fullMeasureDuration, _hostSampleRate ); // samples per measure
     _beatSamples         = ceil( _fullMeasureSamples / _timeSigDenominator ); // samples per beat
     _halfMeasureSamples  = ceil( _fullMeasureSamples / 2 ); // samples per half measure
     _sixteenthSamples    = ceil( _fullMeasureSamples / 16 ); // samples per 16th note

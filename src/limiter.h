@@ -31,8 +31,7 @@
 class Limiter
 {
     public:
-        Limiter();
-        Limiter( float attackMs, float releaseMs, float thresholdDb );
+        Limiter( float attackMs = 10.f, float releaseMs = 500.f, float thresholdDb = 0.6f );
         ~Limiter();
 
         template <typename SampleType>
@@ -45,7 +44,6 @@ class Limiter
         float getLinearGR();
 
     protected:
-        void init( float attackMs, float releaseMs, float thresholdDb );
         void recalculate();
 
         float pTresh;   // in dB, -20 - 20

@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2026 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -251,6 +251,24 @@ tresult PLUGIN_API PluginController::getState( IBStream* state )
 	return kResultTrue;
 }
 
+tresult PLUGIN_API PluginController::notify( Steinberg::Vst::IMessage* message )
+{
+    if ( !message ) {
+        return Steinberg::kInvalidArgument;
+    }
+    /* // mechanism to receive messages from main VST when needed
+    if ( strcmp( message->getMessageID(), "setSampleRate" ) == 0 )
+    {
+        double rate = 0.0;
+        if ( message->getAttributes()->getFloat( "sampleRate", rate ) == Steinberg::kResultTrue ) {
+            this->_sampleRate = rate;
+        }
+        return Steinberg::kResultOk;
+    }
+    */
+    return Steinberg::Vst::EditController::notify( message );
+}
+
 //------------------------------------------------------------------------
 tresult PluginController::receiveText( const char* text )
 {
@@ -275,7 +293,7 @@ tresult PLUGIN_API PluginController::setParamNormalized( ParamID tag, ParamValue
 //------------------------------------------------------------------------
 tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamValue valueNormalized, String128 string )
 {
-    char text[32];
+    char text[ 32 ];
     // these controls are floating point values in 0 - 1 range, we can
     // simply read the normalized value which is in the same range
     switch ( tag )
@@ -283,27 +301,27 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
 // --- AUTO-GENERATED GETPARAM START
 
         case kBitDepthId:
-            sprintf( text, "%.d Bits", ( int ) ( 15 * valueNormalized ) + 1 );
+            snprintf( text, sizeof( text ), "%.d Bits", static_cast<int>( 15 * valueNormalized ) + 1 );
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kBitCrushLfoId:
-            sprintf( text, "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
+            snprintf( text, sizeof( text ), "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kBitCrushLfoDepthId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            snprintf( text, sizeof( text ), "%.2d %%", static_cast<int>( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kWetMixId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            snprintf( text, sizeof( text ), "%.2d %%", static_cast<int>( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kDryMixId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            snprintf( text, sizeof( text ), "%.2d %%", static_cast<int>( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
@@ -320,15 +338,15 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
 tresult PLUGIN_API PluginController::getParamValueByString( ParamID tag, TChar* string, ParamValue& valueNormalized )
 {
     /* example, but better to use a custom Parameter as seen in RangeParameter
-    switch (tag)
+    switch ( tag )
     {
         case kAttackId:
         {
-            Steinberg::UString wrapper ((TChar*)string, -1); // don't know buffer size here!
+            Steinberg::UString wrapper(( TChar* )string, -1 );
             double tmp = 0.0;
-            if (wrapper.scanFloat (tmp))
+            if ( wrapper.scanFloat( tmp ))
             {
-                valueNormalized = expf (logf (10.f) * (float)tmp / 20.f);
+                valueNormalized = expf( logf( 10.f ) * static_cast<float>( tmp ) / 20.f );
                 return kResultTrue;
             }
             return kResultFalse;
