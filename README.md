@@ -77,7 +77,7 @@ And if you are running Linux, you can easily resolve all dependencies by first r
 
 ### Building the plugin
 
-See the provided shell scripts. The build output will be stored in `./build/VST3/__PLUGIN_NAME__.vst3` as well as symbolically linked to your systems VST-plugin folder (on Unix).
+See the provided shell scripts. The build output will be stored in `./build/VST3/__PLUGIN_NAME__.vst3`.
 
 #### Compiling on Unix systems:
 
