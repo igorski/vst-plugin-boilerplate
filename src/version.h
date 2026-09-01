@@ -24,7 +24,7 @@
 #define stringOriginalFilename  "__PLUGIN_NAME__.vst3"
 #define stringFileDescription   "__PLUGIN_NAME__ plugin"
 #define stringCompanyName       "igorski.nl\0"
-#define stringLegalCopyright    #PLUGIN_COPYRIGHT
+#define stringLegalCopyright    PLUGIN_COPYRIGHT
 #define stringLegalTrademarks   "VST is a trademark of Steinberg Media Technologies GmbH"
 
 #endif
